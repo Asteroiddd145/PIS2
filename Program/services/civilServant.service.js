@@ -4,7 +4,7 @@ const requestStatus = require("../constants/requestStatus")
 const civilServantRepository = require("../repositories/civilServant.repository")
 const requestRepository = require("../repositories/request.repository")
 
-const Request = require("../model/request")
+const Request = require("../models/request")
 
 class CivilServantService {
     async tryLogin(login, password) {

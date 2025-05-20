@@ -1,5 +1,6 @@
 class Service {
-    constructor(name, resultDescription, serviceDescription, startDateOfValidity, endDateOfValidity) {
+    constructor(serviceId, name, resultDescription, serviceDescription, startDateOfValidity, endDateOfValidity) {
+        this.serviceId = serviceId
         this.name = name
         this.resultDescription = resultDescription
         this.serviceDescription = serviceDescription

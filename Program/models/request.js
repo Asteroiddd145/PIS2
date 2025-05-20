@@ -1,7 +1,8 @@
 class Request {
-    constructor(user, service, status, result, plannedCompletionDate, dateOfSubmission, dateOfCompletion) {
-        this.user = user
-        this.service = service
+    constructor(requestId, userId, serviceId, status, result, plannedCompletionDate, dateOfSubmission, dateOfCompletion) {
+        this.requestId = requestId
+        this.userId = userId
+        this.serviceId = serviceId
         this.status = status
         this.result = result
         this.plannedCompletionDate = plannedCompletionDate

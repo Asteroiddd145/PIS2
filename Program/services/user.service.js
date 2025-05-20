@@ -6,10 +6,10 @@ const requestRepository = require("../repositories/request.repository")
 const serviceRepository = require("../repositories/service.repository")
 const ruleRepository = require("../repositories/rule.repository")
 
-const User = require("../model/user")
-const Request = require("../model/request")
-const Service = require("../model/service")
-const Rule = require("../model/rule")
+const User = require("../models/user")
+const Request = require("../models/request")
+const Service = require("../models/service")
+const Rule = require("../models/rule")
 
 class UserService {
     async trySignUp(user) {

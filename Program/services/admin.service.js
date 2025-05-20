@@ -4,8 +4,8 @@ const adminRepository = require("../repositories/admin.repository")
 const serviceRepository = require("../repositories/service.repository")
 const ruleRepository = require("../repositories/rule.repository")
 
-const Service = require("../model/service")
-const Rule = require("../model/rule")
+const Service = require("../models/service")
+const Rule = require("../models/rule")
 
 class AdminService {
     async tryLogin(login, password) {
