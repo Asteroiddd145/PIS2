@@ -1,5 +1,6 @@
 const db = require("../db")
 const roles = require("../constants/roles")
+const accountConverter = require("../utilities/accountConverter")
 const userConverter = require("../utilities/userConverter")
 
 class UserRepository {
@@ -11,7 +12,8 @@ class UserRepository {
 
         const row = result.rows[0]
         if (row) {
-            const user = userConverter.fromDatabaseToUser(row)
+            const account = accountConverter.fromDatabaseToAccount(row)
+            const user = accountConverter.fromAccountToUser(account)
             return user
         }
         return null
@@ -19,7 +21,7 @@ class UserRepository {
 
     async findById(userId) {
         const result = await db.query(
-            "SELECT a.*, u.* FROM users u JOIN accounts a ON a.account_id = u.account_id WHERE u.user_id = $1", 
+            "SELECT * FROM users WHERE user_id = $1", 
             [userId]
         )
 

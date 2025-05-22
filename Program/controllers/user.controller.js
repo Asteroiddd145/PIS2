@@ -1,5 +1,3 @@
-const loginStatus = require("../constants/loginStatus")
-
 const userService = require("../services/user.service")
 
 class User {

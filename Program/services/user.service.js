@@ -1,15 +1,13 @@
-const loginStatus = require("../constants/loginStatus")
 const requestStatus = require("../constants/requestStatus")
-
 const userRepository = require("../repositories/user.repository")
 const requestRepository = require("../repositories/request.repository")
 const serviceRepository = require("../repositories/service.repository")
 const ruleRepository = require("../repositories/rule.repository")
-
 const User = require("../models/user")
 const Request = require("../models/request")
 const Service = require("../models/service")
 const Rule = require("../models/rule")
+const Errors = require("../errors")
 
 class UserService {
     async trySignUp(user) {
@@ -17,7 +15,7 @@ class UserService {
     }
 
     async tryLogin(login, password) {
-        return loginStatus.NOT_FOUND
+        return new Errors.AccountNotExist()
     }
 
     async updateUser(userId, user) {

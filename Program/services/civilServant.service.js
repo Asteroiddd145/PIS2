@@ -1,14 +1,12 @@
-const loginStatus = require("../constants/loginStatus")
 const requestStatus = require("../constants/requestStatus")
-
 const civilServantRepository = require("../repositories/civilServant.repository")
 const requestRepository = require("../repositories/request.repository")
-
 const Request = require("../models/request")
+const Errors = require("../errors")
 
 class CivilServantService {
     async tryLogin(login, password) {
-        return loginStatus.NOT_FOUND
+        return new Errors.AccountNotExist()
     }
 
     async getAllRequestsByStatus(status) {

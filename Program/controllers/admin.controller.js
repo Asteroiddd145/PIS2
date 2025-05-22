@@ -1,81 +1,86 @@
-const loginStatus = require("../constants/loginStatus")
 const adminService = require("../services/admin.service")
 const ruleConverter = require("../utilities/ruleConverter")
 const serviceConverter = require("../utilities/serviceConverter")
+const Errors = require("../errors")
 
 class AdminController {
     async logIn(req, res) {
-        const {login, password} = req.body
-        
-        const loginResult = await adminService.tryLogin(login, password)
-
-        if (loginResult === loginStatus.NOT_FOUND) {
-            return res.json("Ошибка! Не найден аккаунт.")
-        }
-
-        if (loginResult === loginStatus.WRONG_PASSWORD) {
-            return res.json("Ошибка! Указан неверный пароль.")
-        }
-
-        if (loginResult === loginStatus.SUCCESS) {
-            return res.json("Вход выполнен!")
+        try {
+            const {login, password} = req.body
+            await adminService.tryLogin(login, password)
+            return res.json({"message": "Вход выполнен"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.AccountNotExist, Errors.AccountWrongPassword)
         }
     }
 
     async getService(req, res) {
         const serviceId = req.params.id
         const service = await adminService.getService(serviceId)
-        return res.json(service)
+        return res.json({"message": "Услуга получена", "service": service})
     }
     
     async getServiceAndRules(req, res) {
         const serviceId = req.params.id
         const {service, rules} = await adminService.getServiceAndRules(serviceId)
-        return res.json({ service, rules })
+        return res.json({"message": "Услуга и её правила получены", "service": service, "rules": rules})
     }
 
     async getAllServices(req, res) {
-        const list = await adminService.getAllServices()
-        return res.json(list)
+        const serviceList = await adminService.getAllServices()
+        return res.json({"message": "Все услуги получены", "services": serviceList})
     }
 
     async addService(req, res) {
         const {service, rules} = req.body
-        
         const addedService = serviceConverter.fromJsonToService(service)
-        
         const addedRules = Array.isArray(rules) ? rules.map(rule => ruleConverter.fromJsonToRule(rule)) : []
-        
         const createdService = await adminService.createService(addedService, addedRules)
-        return res.json(createdService)
+        return res.json({"message": "Услуга добавлена", "service": createdService})
     }
 
     async makeServiceInactive(req, res) {
-        const serviceId = req.params.id
-        await adminService.deactivateService(serviceId)
-        return res.json("ok")
+        try {
+            const serviceId = req.params.id
+            const service = await adminService.deactivateService(serviceId)
+            return res.json({"message": "Услуга больше не активна", "service": service})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive)
+        }   
     }
 
     async addRuleToService(req, res) {
-        const serviceId = req.params.id
-        const rule = req.body
-        const savingRule = ruleConverter.fromJsonToRule(rule)
-        const createdRule = await adminService.createRule(serviceId, savingRule)
-        return res.json(createdRule)
+        try {
+            const serviceId = req.params.id
+            const rule = req.body
+            const savingRule = ruleConverter.fromJsonToRule(rule)
+            const createdRule = await adminService.createRule(serviceId, savingRule)
+            return res.json({"message": "Правило добавлено", "rule": createdRule})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive, Errors.RuleAlreadyExist)
+        }
     }
 
     async editRule(req, res) {
-        const ruleId = req.params.ruleId
-        const rule = req.body
-        const editingRule = ruleConverter.fromJsonToRule(rule)
-        const updatedRule = await adminService.updateRule(ruleId, editingRule)
-        return res.json(updatedRule)
+        try {
+            const ruleId = req.params.ruleId
+            const rule = req.body
+            const editingRule = ruleConverter.fromJsonToRule(rule)
+            await adminService.updateRule(ruleId, editingRule)
+            return res.json({"message": "Правило обновлено"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.RuleNotExist)
+        }
     } 
 
     async deleteRule(req, res) {
-        const ruleId = req.params.ruleId
-        await adminService.deleteRule(ruleId)
-        return res.json("ok")
+        try {
+            const ruleId = req.params.ruleId
+            await adminService.deleteRule(ruleId)
+            return res.json({"message": "Правило удалено"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.RuleNotExist)
+        }
     } 
 }
 

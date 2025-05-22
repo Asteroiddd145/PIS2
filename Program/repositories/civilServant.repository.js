@@ -1,6 +1,6 @@
 const db = require("../db")
 const roles = require("../constants/roles")
-const civilServantConverter = require("../utilities/civilServantConverter")
+const accountConverter = require("../utilities/accountConverter")
 
 class CivilServantRepository {
     async findByLogin(login) {
@@ -11,7 +11,8 @@ class CivilServantRepository {
 
         const row = result.rows[0]
         if (row) {
-            const civilServant = civilServantConverter.fromDatabaseToCivilServant(row)
+            const account = accountConverter.fromDatabaseToAccount(row)
+            const civilServant = accountConverter.fromAccountToCivilServant(account)
             return civilServant
         }
         return null

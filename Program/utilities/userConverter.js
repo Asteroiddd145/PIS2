@@ -5,7 +5,7 @@ function fromJsonToUser(data) {
 }
 
 function fromDatabaseToUser(data) {
-    return new User(data.account_id, data.login, data.password, data.role, data.first_name, data.patronymic, data.last_name, data.inn, data.passport_number, data.passport_series, data.date_of_birth, data.citizenship, data.email)
+    return new User(data.first_name, data.patronymic, data.last_name, data.inn, data.passport_number, data.passport_series, data.date_of_birth, data.citizenship, data.email)
 }
 
 module.exports = { fromJsonToUser, fromDatabaseToUser }

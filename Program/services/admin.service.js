@@ -1,23 +1,20 @@
-const loginStatus = require("../constants/loginStatus")
-
 const adminRepository = require("../repositories/admin.repository")
 const serviceRepository = require("../repositories/service.repository")
 const ruleRepository = require("../repositories/rule.repository")
+const Errors = require("../errors")
 
 class AdminService {
     async tryLogin(login, password) {
         const admin = await adminRepository.findByLogin(login)
 
-        if (!admin) {
-            return loginStatus.NOT_FOUND
-        }
-
-        if (admin.password !== password) {
-            return loginStatus.WRONG_PASSWORD
-        }
-
-        if (admin.password === password) {
-            return loginStatus.SUCCESS
+        if (admin) {
+            if (admin.password === password) {
+                return true
+            } else {
+                throw new Errors.AccountWrongPassword()
+            }
+        } else {
+            throw new Errors.AccountNotExist()
         }
     }
 
@@ -48,11 +45,19 @@ class AdminService {
         if (rules.length > 0) {
             const existedRules = await ruleRepository.findAllByService(serviceId)
 
-            rules.map(rule => {
-                if (existedRules.length === 0 || existedRules.contains(rule)) {
-                    ruleRepository.save(rule, serviceId)
+            for (const rule of rules) {
+                const isDuplicate = existedRules.some(existing =>
+                    existing.description === rule.description &&
+                    existing.period === rule.period &&
+                    existing.parameter === rule.parameter &&
+                    existing.logicalOperator === rule.logicalOperator &&
+                    existing.parameterValue === rule.parameterValue
+                )
+
+                if (!isDuplicate) {
+                    await ruleRepository.save(rule, serviceId)
                 }
-            })
+            }
         }
 
         const createdService = await serviceRepository.findById(serviceId)
@@ -61,24 +66,61 @@ class AdminService {
 
     async deactivateService(serviceId) {
         const service = await serviceRepository.findById(serviceId)
-        service.endDateOfValidity = new Date()
-        await serviceRepository.update(serviceId, service)
+
+        if (service) {
+            if (service.endDateOfValidity === null) {
+                service.endDateOfValidity = new Date()
+                await serviceRepository.update(serviceId, service)
+                return service
+            } else {
+                throw new Errors.ServiceIsDeactive()
+            }
+        } else {
+            throw new Errors.ServiceNotExist()
+        }
     }
 
     async createRule(serviceId, rule) {
-        const ruleId = await ruleRepository.save(rule, serviceId)
-        const createdRule = await ruleRepository.findById(ruleId)
-        return createdRule
+        const service = await serviceRepository.findById(serviceId)
+
+        if (service) {
+            if (service.endDateOfValidity === null) {
+                const existedRules = await ruleRepository.findAllByService(serviceId)
+
+                const isDuplicate = existedRules.some(existing => existing.description === rule.description && existing.period === rule.period && existing.parameter === rule.parameter && existing.logicalOperator === rule.logicalOperator && existing.parameterValue === rule.parameterValue)
+                if (!isDuplicate) {
+                    const ruleId = await ruleRepository.save(rule, serviceId)
+                    const createdRule = await ruleRepository.findById(ruleId)
+                    return createdRule
+                } else {
+                    throw new Errors.RuleAlreadyExist()
+                }                
+            } else {
+                throw new Errors.ServiceIsDeactive()
+            }
+        } else {
+            throw new Errors.ServiceNotExist()
+        }
     }
 
     async updateRule(ruleId, rule) {
-        await ruleRepository.update(ruleId, rule)
-        const updatedRule = await ruleRepository.findById(ruleId)
-        return updatedRule
+        const editingRule = await ruleRepository.findById(ruleId)
+
+        if (editingRule) {
+            await ruleRepository.update(ruleId, rule)
+        } else {
+            throw new Errors.RuleNotExist()
+        }
     }
 
     async deleteRule(ruleId) {
-        await ruleRepository.delete(ruleId)
+        const editingRule = await ruleRepository.findById(ruleId)
+
+        if (editingRule) {
+            await ruleRepository.delete(ruleId)
+        } else {
+            throw new Errors.RuleNotExist()
+        }
     }
 }
 
