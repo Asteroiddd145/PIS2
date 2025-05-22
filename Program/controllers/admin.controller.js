@@ -15,15 +15,23 @@ class AdminController {
     }
 
     async getService(req, res) {
-        const serviceId = req.params.id
-        const service = await adminService.getService(serviceId)
-        return res.json({"message": "Услуга получена", "service": service})
+        try {
+            const serviceId = req.params.id
+            const service = await adminService.getService(serviceId)
+            return res.json({"message": "Услуга получена", "service": service})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive)
+        }
     }
     
     async getServiceAndRules(req, res) {
-        const serviceId = req.params.id
-        const {service, rules} = await adminService.getServiceAndRules(serviceId)
-        return res.json({"message": "Услуга и её правила получены", "service": service, "rules": rules})
+        try {
+            const serviceId = req.params.id
+            const {service, rules} = await adminService.getServiceAndRules(serviceId)
+            return res.json({"message": "Услуга и её правила получены", "service": service, "rules": rules})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive)
+        }
     }
 
     async getAllServices(req, res) {

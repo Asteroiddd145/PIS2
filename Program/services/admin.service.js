@@ -6,7 +6,6 @@ const Errors = require("../errors")
 class AdminService {
     async tryLogin(login, password) {
         const admin = await adminRepository.findByLogin(login)
-
         if (admin) {
             if (admin.password === password) {
                 return true
@@ -20,13 +19,29 @@ class AdminService {
 
     async getService(serviceId) {
         const service = await serviceRepository.findById(serviceId)
-        return service
+        if (service) {
+            if (service.endDateOfValidity === null) {
+                return service
+            } else {
+                throw new Errors.ServiceIsDeactive()
+            }
+        } else {
+            throw new Errors.ServiceNotExist()
+        }
     }
 
     async getServiceAndRules(serviceId) {
         const service = await serviceRepository.findById(serviceId)
-        const rules = await ruleRepository.findAllByService(serviceId)
-        return {service, rules}
+        if (service) {
+            if (service.endDateOfValidity === null) {
+                const rules = await ruleRepository.findAllByService(serviceId)
+                return {service, rules}
+            } else {
+                throw new Errors.ServiceIsDeactive()
+            }
+        } else {
+            throw new Errors.ServiceNotExist()
+        }
     }
     
     async getAllServices() {
@@ -41,10 +56,8 @@ class AdminService {
 
     async createService(service, rules) {
         const serviceId = await serviceRepository.save(service)
-
         if (rules.length > 0) {
             const existedRules = await ruleRepository.findAllByService(serviceId)
-
             for (const rule of rules) {
                 const isDuplicate = existedRules.some(existing =>
                     existing.description === rule.description &&
@@ -53,20 +66,17 @@ class AdminService {
                     existing.logicalOperator === rule.logicalOperator &&
                     existing.parameterValue === rule.parameterValue
                 )
-
                 if (!isDuplicate) {
                     await ruleRepository.save(rule, serviceId)
                 }
             }
         }
-
         const createdService = await serviceRepository.findById(serviceId)
         return createdService
     }
 
     async deactivateService(serviceId) {
         const service = await serviceRepository.findById(serviceId)
-
         if (service) {
             if (service.endDateOfValidity === null) {
                 service.endDateOfValidity = new Date()
@@ -82,11 +92,9 @@ class AdminService {
 
     async createRule(serviceId, rule) {
         const service = await serviceRepository.findById(serviceId)
-
         if (service) {
             if (service.endDateOfValidity === null) {
                 const existedRules = await ruleRepository.findAllByService(serviceId)
-
                 const isDuplicate = existedRules.some(existing => existing.description === rule.description && existing.period === rule.period && existing.parameter === rule.parameter && existing.logicalOperator === rule.logicalOperator && existing.parameterValue === rule.parameterValue)
                 if (!isDuplicate) {
                     const ruleId = await ruleRepository.save(rule, serviceId)
@@ -105,7 +113,6 @@ class AdminService {
 
     async updateRule(ruleId, rule) {
         const editingRule = await ruleRepository.findById(ruleId)
-
         if (editingRule) {
             await ruleRepository.update(ruleId, rule)
         } else {
@@ -115,7 +122,6 @@ class AdminService {
 
     async deleteRule(ruleId) {
         const editingRule = await ruleRepository.findById(ruleId)
-
         if (editingRule) {
             await ruleRepository.delete(ruleId)
         } else {
