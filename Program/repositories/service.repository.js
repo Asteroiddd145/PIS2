@@ -1,18 +1,15 @@
 const db = require("../db")
-const Service = require("../models/service")
+const serviceConverter = require("../utilities/serviceConverter")
 
 class ServiceRepository {
     async getAll() {
         const result = await db.query(
-            "SELECT * FROM services", 
+            "SELECT * FROM services"
         )
 
         const rows = result.rows
-        if (rows.length !== 0) {
-            const list = rows.map(row => new Service(row.service_id, row.name, row.result_description, row.service_description, row.start_date_of_validity, row.end_date_of_validity))
-            return list
-        }
-        return null
+        const list = rows.map(row => serviceConverter.fromDatabasetoService(row))
+        return list
     }
 
     async findById(serviceId) {
@@ -23,7 +20,7 @@ class ServiceRepository {
 
         const row = result.rows[0]
         if (row) {
-            const service = new Service(row.service_id, row.name, row.result_description, row.service_description, row.start_date_of_validity, row.end_date_of_validity)
+            const service = serviceConverter.fromDatabasetoService(row)
             return service
         }
         return null

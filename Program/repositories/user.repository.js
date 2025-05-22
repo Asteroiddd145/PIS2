@@ -1,6 +1,6 @@
 const db = require("../db")
 const roles = require("../constants/roles")
-const User = require("../models/user")
+const userConverter = require("../utilities/userConverter")
 
 class UserRepository {
     async findByLogin(login) {
@@ -11,7 +11,7 @@ class UserRepository {
 
         const row = result.rows[0]
         if (row) {
-            const user = new User(row.account_id, row.login, row.password, row.role)
+            const user = userConverter.fromDatabaseToUser(row)
             return user
         }
         return null
@@ -25,7 +25,7 @@ class UserRepository {
 
         const row = result.rows[0]
         if (row) {
-            const user = new User(row.account_id, row.login, row.password, row.role, row.first_name, row.patronymic, row.last_name, row.inn, row.passport_number, row.passport_series, row.date_of_birth, row.citizenship, row.email)
+            const user = userConverter.fromDatabaseToUser(row)
             return user
         }
         return null

@@ -1,6 +1,6 @@
 const db = require("../db")
 const roles = require("../constants/roles")
-const Admin = require("../models/admin")
+const adminConverter = require("../utilities/adminConverter")
 
 class AdminRepository {
     async findByLogin(login) {
@@ -11,7 +11,7 @@ class AdminRepository {
 
         const row = result.rows[0]
         if (row) {
-            const admin = new Admin(row.account_id, row.login, row.password, row.role)
+            const admin = adminConverter.fromDatabaseToAdmin(row)
             return admin
         }
         return null

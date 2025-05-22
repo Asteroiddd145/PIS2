@@ -1,5 +1,5 @@
 const db = require("../db")
-const Rule = require("../models/rule")
+const ruleConverter = require("../utilities/ruleConverter")
 
 class RuleRepository {
     async findById(ruleId) {
@@ -10,24 +10,24 @@ class RuleRepository {
 
         const row = result.rows[0]
         if (row) {
-            const rule = new Rule(row.rule_id, row.service_id, row.description, row.period, row.parameter, row.logical_operator, row.parameter_value)
+            const rule = ruleConverter.fromDatabasetoRule(row)
             return rule
         }
         return null
     }
     
-    async findByService(serviceId) {
+    async findAllByService(serviceId) {
         const result = await db.query(
             "SELECT * FROM rules WHERE service_id = $1",
             [serviceId]
         )
 
         const rows = result.rows
-        if (rows.length !== 0) {
-            const list = rows.map(row => new Rule(row.rule_id, row.service_id, row.description, row.period, row.parameter, row.logical_operator, row.parameter_value))
+        if (rows.length > 0) {
+            const list = rows.map(row => ruleConverter.fromDatabasetoRule(row))
             return list
         }
-        return null
+        return []
     }
 
     async save(rule, serviceId) {

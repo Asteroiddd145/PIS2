@@ -1,5 +1,5 @@
 const db = require("../db")
-const Request = require("../models/request")
+const requestConverter = require("../utilities/requestConverter")
 
 class RequestRepository {
     async getAllByStatus(status) {
@@ -9,11 +9,11 @@ class RequestRepository {
         )
 
         const rows = result.rows
-        if (rows.length !== 0) {
-            const list = rows.map(row => new Request(row.request_id, row.account_id, row.service_id, row.status, row.result, row.planned_completion_date, row.date_of_submission, row.date_of_completion))
+        if (rows.length > 0) {
+            const list = rows.map(row => requestConverter.fromDatabasetoRequest(row))
             return list
         }
-        return null
+        return []
     }
 
     async findById(requestId) {
@@ -24,7 +24,7 @@ class RequestRepository {
 
         const row = result.rows[0]
         if (row) {
-            const request = new Request(row.request_id, row.account_id, row.service_id, row.status, row.result, row.planned_completion_date, row.date_of_submission, row.date_of_completion)
+            const request = requestConverter.fromDatabasetoRequest(row)
             return request
         }
         return null
