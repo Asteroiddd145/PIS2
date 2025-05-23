@@ -46,6 +46,14 @@ class RuleAlreadyExist extends Error {
     }
 }
 
+class RequestNotExist extends Error {
+    constructor() {
+        super("Заявки не существует")
+        this.name = "RequestNotExistError"
+        this.status = 400
+    }
+}
+
 function matchAndRespondError(error, res, ...errorClasses) {
     for (const errorClass of errorClasses) {
         if (error instanceof errorClass) {
@@ -56,7 +64,6 @@ function matchAndRespondError(error, res, ...errorClasses) {
     return res.status(500).json({ error: "Неизвестная ошибка сервера" })
 }
 
-
 module.exports = {
     AccountNotExist,
     AccountWrongPassword,
@@ -64,5 +71,6 @@ module.exports = {
     ServiceIsDeactive,
     RuleNotExist,
     RuleAlreadyExist,
+    RequestNotExist,
     matchAndRespondError
 }

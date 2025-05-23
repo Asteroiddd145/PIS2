@@ -1,34 +1,53 @@
 const civilServantService = require("../services/civilServant.service")
+const Errors = require("../errors")
 
 class CivilServant {
     async logIn(req, res) {
-        const {login, password} = req.body
-        
-        const loginResult = await civilServantService.tryLogin(login, password)
-
-        if (loginResult === loginStatus.NOT_FOUND) {
-            return res.json("Ошибка! Не найден аккаунт.")
-        }
-
-        if (loginResult === loginStatus.WRONG_PASSWORD) {
-            return res.json("Ошибка! Указан неверный пароль.")
-        }
-
-        if (loginResult === loginStatus.SUCCESS) {
-            return res.json("Вход выполнен!")
+        try {
+            const {login, password} = req.body
+            await civilServantService.tryLogin(login, password)
+            return res.json({"message": "Вход выполнен"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.AccountNotExist, Errors.AccountWrongPassword)
         }
     }
 
     async getRequest(req, res) {
-        
+        try {
+            const requestId = req.params.id
+            const request = await civilServantService.getRequest(requestId)
+            return res.json({"message": "Заявка получена", "request": request})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+        }  
+    }
+
+    async getAllRequests(req, res) {
+        const status = req.body.status  
+        const requestList = await civilServantService.getAllRequestsByStatus(status)
+        return res.json({"message": "Все заявки по статусу получены", "requests": requestList})
     }
 
     async changeRequestStatus(req, res) {
-        
+        try {
+            const requestId = req.params.id
+            const status = req.body.status
+            await civilServantService.changeRequestStatus(requestId, status)
+            return res.json({"message": "Статус изменён"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+        }
     }
 
     async attachResultToRequest(req, res) {
-        
+        try {
+            const requestId = req.params.id
+            const result = req.body.result
+            await civilServantService.attachRequestResult(requestId, result)
+            return res.json({"message": "Результат прикреплён"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+        }
     }
 }
 
