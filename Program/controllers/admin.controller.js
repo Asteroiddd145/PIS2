@@ -16,7 +16,7 @@ class AdminController {
 
     async getService(req, res) {
         try {
-            const serviceId = req.params.id
+            const serviceId = req.params.serviceId
             const service = await adminService.getService(serviceId)
             return res.json({"message": "Услуга получена", "service": service})
         } catch (error) {
@@ -26,7 +26,7 @@ class AdminController {
     
     async getServiceAndRules(req, res) {
         try {
-            const serviceId = req.params.id
+            const serviceId = req.params.serviceId
             const {service, rules} = await adminService.getServiceAndRules(serviceId)
             return res.json({"message": "Услуга и её правила получены", "service": service, "rules": rules})
         } catch (error) {
@@ -49,7 +49,7 @@ class AdminController {
 
     async makeServiceInactive(req, res) {
         try {
-            const serviceId = req.params.id
+            const serviceId = req.params.serviceId
             const service = await adminService.deactivateService(serviceId)
             return res.json({"message": "Услуга больше не активна", "service": service})
         } catch (error) {
@@ -59,7 +59,7 @@ class AdminController {
 
     async addRuleToService(req, res) {
         try {
-            const serviceId = req.params.id
+            const serviceId = req.params.serviceId
             const rule = req.body
             const savingRule = ruleConverter.fromJsonToRule(rule)
             const createdRule = await adminService.createRule(serviceId, savingRule)

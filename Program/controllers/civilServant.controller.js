@@ -12,9 +12,20 @@ class CivilServant {
         }
     }
 
+    async processRequest(req, res) {
+        try {
+            const civilServantId = req.params.id
+            const requestId = req.params.requestId
+            await civilServantService.linkRequestWithResponsible(civilServantId, requestId)
+            return res.json({"message": "Заявка готова к обработке"})
+        } catch (error) {
+            Errors.matchAndRespondError(error, res, Errors.RequestNotExist, Errors.RequestNotAvailable)
+        }
+    }
+
     async getRequest(req, res) {
         try {
-            const requestId = req.params.id
+            const requestId = req.params.requestId
             const request = await civilServantService.getRequest(requestId)
             return res.json({"message": "Заявка получена", "request": request})
         } catch (error) {
@@ -30,7 +41,7 @@ class CivilServant {
 
     async changeRequestStatus(req, res) {
         try {
-            const requestId = req.params.id
+            const requestId = req.params.requestId
             const status = req.body.status
             await civilServantService.changeRequestStatus(requestId, status)
             return res.json({"message": "Статус изменён"})
@@ -41,7 +52,7 @@ class CivilServant {
 
     async attachResultToRequest(req, res) {
         try {
-            const requestId = req.params.id
+            const requestId = req.params.requestId
             const result = req.body.result
             await civilServantService.attachRequestResult(requestId, result)
             return res.json({"message": "Результат прикреплён"})

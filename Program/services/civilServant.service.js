@@ -17,6 +17,21 @@ class CivilServantService {
         }
     }
 
+    async linkRequestWithResponsible(civilServantId, requestId) {
+        const request = await requestRepository.findById(requestId)
+        if (request) {
+            if (request.status === requestStatus.WAITING) {
+                request.status = requestStatus.IN_PROGRESS
+                request.civilServantId = civilServantId
+                await requestRepository.update(requestId, request)
+            } else {
+                throw new Errors.RequestNotAvailable()
+            }
+        } else {
+            throw new Errors.RequestNotExist()
+        }
+    }
+
     async getRequest(requestId) {
         const request = await requestRepository.findById(requestId)
         if (request) {

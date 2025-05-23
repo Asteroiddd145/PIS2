@@ -40,7 +40,8 @@ CREATE TABLE rules (
 
 CREATE TABLE requests (
 	request_id SERIAL PRIMARY KEY,
-	account_id SERIAL REFERENCES accounts(account_id),
+	user_id SERIAL REFERENCES users(user_id),
+	civil_servant_id SERIAL REFERENCES accounts(account_id),
 	service_id SERIAL REFERENCES services(service_id),
 	status VARCHAR(64),
 	result TEXT,

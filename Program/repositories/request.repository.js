@@ -2,6 +2,19 @@ const db = require("../db")
 const requestConverter = require("../utilities/requestConverter")
 
 class RequestRepository {
+    async getAll() {
+        const result = await db.query(
+            "SELECT * FROM requests"
+        )
+
+        const rows = result.rows
+        if (rows.length > 0) {
+            const list = rows.map(row => requestConverter.fromDatabasetoRequest(row))
+            return list
+        }
+        return []
+    }
+
     async getAllByStatus(status) {
         const result = await db.query(
             "SELECT * FROM requests WHERE status = $1", 
@@ -32,16 +45,16 @@ class RequestRepository {
 
     async save(request) {
         const result = await db.query(
-            "INSERT INTO requests (account_id, service_id, status, result, planned_completion_date, date_of_submission, date_of_completion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING request_id",
-            [request.userId, request.serviceId, request.status, request.result, request.plannedCompletionDate, request.dateOfSubmission, request.dateOfCompletion]
+            "INSERT INTO requests (user_id, civil_servant_id, service_id, status, result, planned_completion_date, date_of_submission, date_of_completion) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING request_id",
+            [request.userId, request.civilServantId, request.serviceId, request.status, request.result, request.plannedCompletionDate, request.dateOfSubmission, request.dateOfCompletion]
         )
         return result.rows[0].request_id
     }
 
     async update(requestId, request) {
         await db.query(
-            "UPDATE requests SET account_id = $1, service_id = $2, status = $3, result = $4, planned_completion_date = $5, date_of_submission = $6, date_of_completion = $7 WHERE request_id = $8",
-            [request.userId, request.serviceId, request.status, request.result, request.plannedCompletionDate, request.dateOfSubmission, request.dateOfCompletion, requestId]
+            "UPDATE requests SET user_id = $1, civil_servant_id=$2, service_id = $3, status = $4, result = $5, planned_completion_date = $6, date_of_submission = $7, date_of_completion = $8 WHERE request_id = $9",
+            [request.userId, request.civilServantId, request.serviceId, request.status, request.result, request.plannedCompletionDate, request.dateOfSubmission, request.dateOfCompletion, requestId]
         )
     }
 }
