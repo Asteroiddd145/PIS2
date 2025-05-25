@@ -1,0 +1,57 @@
+*, html, input, button {
+    font-family: "Lato", Helvetica, Arial, sans-serif;
+}
+body {
+    background: #E4ECFD;
+    margin: 0;
+}
+.notification {
+    position: fixed;
+    display: none;
+    background: #EE3F58;
+    bottom: 0;
+    right: 0;
+    margin: 32px;
+    padding: 12px;
+    gap: 4px;
+    color: white;
+    border-radius: 8px;
+    z-index: 1000;
+    p {
+        margin: 0;
+    }
+}
+input {
+    color: #66727f;
+    font-size: 14px;
+    background: #F5F7FA;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 4px 8px;
+    outline: none;
+    transition: border-color 0.1s ease;
+}
+input:focus  {
+    color: rgb(32, 32, 32);
+    border-color: #99B1E6;
+}
+button {
+    color: white;
+    font-size: 14px;
+    padding: 4px 8px;
+    border: none;
+    background: #0D4CD3;
+    border-radius: 8px;
+    transition: background 0.1s ease;
+    &:hover {
+        background: #4770EB;
+    }
+}
+a {
+    color: #0D4CD3;
+    text-decoration: none;
+    transition: color 0.1s ease;
+    &:hover {
+        color: #4770EB;
+    }
+}

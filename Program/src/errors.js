@@ -1,6 +1,6 @@
 class AccountNotExist extends Error {
     constructor() {
-        super("Аккаунт не существует")
+        super("Аккаунт не существует.")
         this.name = "AccountNotExistError"
         this.status = 400
     }
@@ -8,7 +8,7 @@ class AccountNotExist extends Error {
 
 class AccountWrongPassword extends Error {
     constructor() {
-        super("Неверный пароль")
+        super("Неверный пароль.")
         this.name = "WrongPasswordError"
         this.status = 400
     }
@@ -16,7 +16,7 @@ class AccountWrongPassword extends Error {
 
 class ServiceNotExist extends Error {
     constructor() {
-        super("Услуга не существует")
+        super("Услуга не существует.")
         this.name = "ServiceNotExistError"
         this.status = 400
     }
@@ -24,7 +24,7 @@ class ServiceNotExist extends Error {
 
 class ServiceIsDeactive extends Error {
     constructor() {
-        super("Услуга не активна")
+        super("Услуга не активна.")
         this.name = "ServiceIsDeactiveError"
         this.status = 400
     }
@@ -32,7 +32,7 @@ class ServiceIsDeactive extends Error {
 
 class RuleNotExist extends Error {
     constructor() {
-        super("Правило не существует")
+        super("Правило не существует.")
         this.name = "RuleNotExistError"
         this.status = 400
     }
@@ -40,7 +40,7 @@ class RuleNotExist extends Error {
 
 class RuleAlreadyExist extends Error {
     constructor() {
-        super("Такое правило уже существует")
+        super("Такое правило уже существует.")
         this.name = "RuleAlreadyExistError"
         this.status = 400
     }
@@ -48,7 +48,7 @@ class RuleAlreadyExist extends Error {
 
 class RequestNotExist extends Error {
     constructor() {
-        super("Заявки не существует")
+        super("Заявки не существует.")
         this.name = "RequestNotExistError"
         this.status = 400
     }
@@ -56,7 +56,7 @@ class RequestNotExist extends Error {
 
 class RequestNotAvailable extends Error {
     constructor() {
-        super("Заявка не доступна")
+        super("Заявка не доступна.")
         this.name = "RequestNotAvailableError"
         this.status = 400
     }
@@ -64,7 +64,7 @@ class RequestNotAvailable extends Error {
 
 class RequestAlreadyBeingProcessed extends Error {
     constructor() {
-        super("Заявка не доступна")
+        super("Заявка не доступна.")
         this.name = "RequestIsNotAvailableError"
         this.status = 400
     }
@@ -72,7 +72,7 @@ class RequestAlreadyBeingProcessed extends Error {
 
 class LoginAlreadyExist extends Error {
     constructor() {
-        super("Логин уже существует")
+        super("Логин уже существует.")
         this.name = "LoginAlreadyExistError"
         this.status = 400
     }
@@ -80,26 +80,28 @@ class LoginAlreadyExist extends Error {
 
 class UserNotExist extends Error {
     constructor() {
-        super("Пользователя не существует")
+        super("Пользователя не существует.")
         this.name = "UserNotExistError"
         this.status = 400
     }
 }
 
-function matchAndRespondError(error, res, ...errorClasses) {
+function matchAndRespondError(error, req, ...errorClasses) {
     for (const errorClass of errorClasses) {
         if (error instanceof errorClass) {
-            return res.status(error.status || 400).json({ error: error.message })
+            req.session.errorMessage = error.message
+            //return res.status(error.status || 400).json({ error: error.message })
         }
     }
 
-    return res.status(500).json({
+    req.session.errorMessage = "Неизвестная ошибка сервера."
+    /*return res.status(500).json({
         error: {
-            title: "Неизвестная ошибка сервера",
+            title: "Неизвестная ошибка сервера.",
             message: error.message,
             name: error.name
         }
-    })
+    })*/
 }
 
 

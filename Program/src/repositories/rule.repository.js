@@ -1,4 +1,4 @@
-const db = require("../db")
+const db = require("../../db")
 const ruleConverter = require("../utilities/ruleConverter")
 
 class RuleRepository {

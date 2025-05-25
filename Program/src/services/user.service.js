@@ -3,15 +3,13 @@ const userRepository = require("../repositories/user.repository")
 const requestRepository = require("../repositories/request.repository")
 const serviceRepository = require("../repositories/service.repository")
 const ruleRepository = require("../repositories/rule.repository")
-const User = require("../models/user")
 const Request = require("../models/request")
 const Errors = require("../errors")
 
 class UserService {
-    async trySignUp(login, password) {
-        const user = await userRepository.findByLogin(login)
+    async trySignUp(savedUser) {
+        const user = await userRepository.findByLogin(savedUser.login)
         if (!user) {
-            const savedUser = new User(null, login, password)
             await userRepository.save(savedUser)
             return true
         } else {
@@ -23,7 +21,7 @@ class UserService {
         const user = await userRepository.findByLogin(login)
         if (user) {
             if (user.password === password) {
-                return true
+                return user.accountId
             } else {
                 throw new Errors.AccountWrongPassword()
             }

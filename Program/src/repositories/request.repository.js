@@ -1,4 +1,4 @@
-const db = require("../db")
+const db = require("../../db")
 const requestConverter = require("../utilities/requestConverter")
 
 class RequestRepository {

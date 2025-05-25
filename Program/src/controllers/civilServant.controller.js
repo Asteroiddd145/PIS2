@@ -8,7 +8,7 @@ class CivilServant {
             await civilServantService.tryLogin(login, password)
             return res.json({"message": "Вход выполнен"})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.AccountNotExist, Errors.AccountWrongPassword)
+            Errors.matchAndRespondError(error, req, Errors.AccountNotExist, Errors.AccountWrongPassword)
         }
     }
 
@@ -19,7 +19,7 @@ class CivilServant {
             await civilServantService.linkRequestWithResponsible(civilServantId, requestId)
             return res.json({"message": "Заявка готова к обработке"})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.RequestNotExist, Errors.RequestNotAvailable)
+            Errors.matchAndRespondError(error, req, Errors.RequestNotExist, Errors.RequestNotAvailable)
         }
     }
 
@@ -29,7 +29,7 @@ class CivilServant {
             const request = await civilServantService.getRequest(requestId)
             return res.json({"message": "Заявка получена", "request": request})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+            Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
         }  
     }
 
@@ -46,7 +46,7 @@ class CivilServant {
             await civilServantService.changeRequestStatus(requestId, status)
             return res.json({"message": "Статус изменён"})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+            Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
         }
     }
 
@@ -57,7 +57,7 @@ class CivilServant {
             await civilServantService.attachRequestResult(requestId, result)
             return res.json({"message": "Результат прикреплён"})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+            Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
         }
     }
 }

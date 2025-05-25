@@ -1,0 +1,44 @@
+@import "./global.css";
+body {
+    height: 100vh;
+    margin: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+form {
+    width: 300px;
+
+    display: flex;
+    flex-direction: column;
+    background: white;
+    
+    border-radius: 12px;
+    gap: 10px;
+    padding: 32px;
+    label { 
+        font-size: 40px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 12px;
+        .red {
+            color: #EE3F58;
+        }
+        .blue {
+            color: #0D4CD3;
+        }
+    }
+    input, button {
+        padding: 16px 8px;
+    }
+}
+div {
+    margin: 32px;
+}

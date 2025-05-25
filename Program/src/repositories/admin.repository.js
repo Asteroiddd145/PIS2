@@ -1,4 +1,4 @@
-const db = require("../db")
+const db = require("../../db")
 const roles = require("../constants/roles")
 const accountConverter = require("../utilities/accountConverter")
 

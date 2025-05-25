@@ -1,47 +1,51 @@
 const userService = require("../services/user.service")
 const userConverter = require("../utilities/userConverter")
-const Errors = require("../errors")
+const User = require("../models/user")
 
-class User {
+class UserController {
     async signUp(req, res) {
         try {
-            const {login, password} = req.body
-            await userService.trySignUp(login, password)
-            return res.json({"message": "Аккаунт зарегистрирован"})
+            const {firstName, lastName, email, login, password} = req.body
+            const user = new User(null, login, password, null, firstName, null, lastName, null, null, null, null, null, email)
+            await userService.trySignUp(user)
+            res.redirect("/user/login") 
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.LoginAlreadyExist)
+            req.session.errorMessage = error.message
+            res.redirect("/user/signup") 
         }
     }
 
     async logIn(req, res) {
         try {
             const {login, password} = req.body
-            await userService.tryLogin(login, password)
-            return res.json({"message": "Вход выполнен"})
+            const userId = await userService.tryLogin(login, password)
+            req.session.userId = userId
+            res.redirect("/user/services")
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.AccountNotExist, Errors.AccountWrongPassword)
+            req.session.errorMessage = error.message
+            res.redirect("/user/login")
         }
     }
 
     async getUserProfile(req, res) {
         try {
-            const userId = req.params.id
+            const userId = req.session.userId
             const user = await userService.getUser(userId)
             return res.json({"message": "Пользователь получен", "user": user})
         } catch {
-            Errors.matchAndRespondError(error, res, Errors.UserNotExist)
+            req.session.errorMessage = error.message
         }
     }
 
     async applyUserChanges(req, res) {
         try {
-            const userId = req.params.id
+            const userId = req.session.userId
             const user = req.body
             const editingUser = userConverter.fromJsonToUser(user)
             await userService.updateUser(userId, editingUser)
             return res.json({"message": "Профиль обновлён"})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.UserNotExist)
+            req.session.errorMessage = error.message
         }
     }
 
@@ -56,7 +60,7 @@ class User {
             const service = await userService.getService(serviceId)
             return res.json({"message": "Услуга получена", "service": service})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive)
+            req.session.errorMessage = error.message
         }
     }
 
@@ -66,12 +70,12 @@ class User {
             const {service, rules} = await userService.getServiceAndRules(serviceId)
             return res.json({"message": "Услуга и её правила получены", "service": service, "rules": rules})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive)
+            req.session.errorMessage = error.message
         }
     }
 
     async getRequests(req, res) {
-        const userId = req.params.id
+        const userId = req.session.userId
         const requests = await userService.getAllRequests(userId)
         return res.json({"message": "Заявки получены", "requests": requests})
     }
@@ -82,18 +86,18 @@ class User {
             const request = await userService.getRequest(requestId)
             return res.json({"message": "Заявка получена", "request": request})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.RequestNotExist)
+            req.session.errorMessage = error.message
         }
     }
 
     async submitRequest(req, res) {
         try {
-            const userId = req.params.id
+            const userId = req.session.userId
             const serviceId = req.params.serviceId
             const request = await userService.createRequest(userId, serviceId)
             return res.json({"message": "Заявка подана", "request": request})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.ServiceNotExist, Errors.ServiceIsDeactive)
+            req.session.errorMessage = error.message
         }
     }
 
@@ -103,9 +107,9 @@ class User {
             await userService.cancelRequest(requestId)
             return res.json({"message": "Заявка отменена"})
         } catch (error) {
-            Errors.matchAndRespondError(error, res, Errors.RequestNotExist, Errors.RequestAlreadyBeingProcessed)
+            req.session.errorMessage = error.message
         }
     }
 }
 
-module.exports = new User()
+module.exports = new UserController()
