@@ -1,0 +1,19 @@
+@import "./global.css";
+
+#content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.service_desc, .result_desc, .rules {
+    border: 1px dashed rgba(29,93,235,.18);
+    border-radius: 12px;
+    padding: 24px;
+
+    p, h4 {
+        margin: 0;
+    }
+    h4 {
+        margin-bottom: 12px;
+    }
+}

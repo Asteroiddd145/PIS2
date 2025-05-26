@@ -1,0 +1,59 @@
+<%- include('partials/header.ejs') %>
+<main>
+<div id="content">
+</div>
+</main>
+
+<script>
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const pathParts = window.location.pathname.split("/")
+  const serviceId = pathParts[pathParts.length - 1]
+
+  fetch(`/api/user/services/${serviceId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`)
+      return res.json()
+    })
+    .then(data => {
+      if (data.redirect) {
+        window.location.href = data.redirect;
+        return;
+      } 
+      
+      const { service, rules } = data
+      const container = document.getElementById("content")
+
+      const serviceTemplate = `
+          <h2 class="name">${service.name}</h2>
+          <div class="service_desc">
+            <h4>Описание услуги</h4>
+            <p>${service.serviceDescription}</p>
+          </div>
+          <div class="result_desc">
+            <h4>Описание результата</h4>
+            <p>${service.resultDescription}</p>
+          </div>
+      `
+
+      const rulesTemplate = rules.length ? `
+        <div class="rules">
+          <h4>Правила</h4>
+          <ul>
+            ${rules.map(rule => `
+              <li>
+                <p>${rule.description}</p>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+      ` : `
+      <div class="rules">
+        <p>Правил нет.</p>
+      </div>`
+
+      container.innerHTML = serviceTemplate + rulesTemplate
+    })
+})
+
+</script>

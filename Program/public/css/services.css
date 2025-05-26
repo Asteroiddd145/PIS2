@@ -1,1 +1,13 @@
 @import "./global.css";
+
+#content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.service {
+    a {
+        font-size: 20px;
+        cursor: pointer;
+    }
+}

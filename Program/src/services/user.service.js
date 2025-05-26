@@ -21,7 +21,8 @@ class UserService {
         const user = await userRepository.findByLogin(login)
         if (user) {
             if (user.password === password) {
-                return user.accountId
+                const userFromAccount = await userRepository.findByAccountId(user.accountId) 
+                return userFromAccount.userId
             } else {
                 throw new Errors.AccountWrongPassword()
             }
@@ -43,7 +44,7 @@ class UserService {
         const user = await userRepository.findById(userId)
         if (user) {
             Object.keys(user).forEach(key => {
-                if (newUser[key] !== user[key]) {
+                if (newUser[key] !== user[key] && newUser[key] !== null && newUser[key] !== "" && newUser[key] !== undefined) {
                     user[key] = newUser[key]
                 }
             })

@@ -4,7 +4,7 @@ const serviceConverter = require("../utilities/serviceConverter")
 class ServiceRepository {
     async getAll() {
         const result = await db.query(
-            "SELECT * FROM services"
+            "SELECT * FROM services ORDER BY name"
         )
 
         const rows = result.rows

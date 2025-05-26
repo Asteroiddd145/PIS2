@@ -6,7 +6,7 @@ class UserController {
     async signUp(req, res) {
         try {
             const {firstName, lastName, email, login, password} = req.body
-            const user = new User(null, login, password, null, firstName, null, lastName, null, null, null, null, null, email)
+            const user = new User(null, login, password, null, null, firstName, null, lastName, null, null, null, null, null, email)
             await userService.trySignUp(user)
             res.redirect("/user/login") 
         } catch (error) {
@@ -20,6 +20,7 @@ class UserController {
             const {login, password} = req.body
             const userId = await userService.tryLogin(login, password)
             req.session.userId = userId
+            req.session.save()
             res.redirect("/user/services")
         } catch (error) {
             req.session.errorMessage = error.message
@@ -29,23 +30,24 @@ class UserController {
 
     async getUserProfile(req, res) {
         try {
-            const userId = req.session.userId
-            const user = await userService.getUser(userId)
+            const user = await userService.getUser(req.session.userId)
+            console.log(user)
             return res.json({"message": "Пользователь получен", "user": user})
-        } catch {
+        } catch (error) {
             req.session.errorMessage = error.message
         }
     }
 
     async applyUserChanges(req, res) {
         try {
-            const userId = req.session.userId
             const user = req.body
+            user.userId = req.session.userId
             const editingUser = userConverter.fromJsonToUser(user)
-            await userService.updateUser(userId, editingUser)
-            return res.json({"message": "Профиль обновлён"})
+            await userService.updateUser(req.session.userId, editingUser)
+            res.redirect("/user/services")
         } catch (error) {
             req.session.errorMessage = error.message
+            res.redirect("/user/services")
         }
     }
 
@@ -61,6 +63,7 @@ class UserController {
             return res.json({"message": "Услуга получена", "service": service})
         } catch (error) {
             req.session.errorMessage = error.message
+            res.redirect("/user/services")
         }
     }
 
@@ -68,15 +71,15 @@ class UserController {
         try {
             const serviceId = req.params.serviceId
             const {service, rules} = await userService.getServiceAndRules(serviceId)
-            return res.json({"message": "Услуга и её правила получены", "service": service, "rules": rules})
+            return res.json({"message": "Услуга и её правила получены",  "service": service, "rules": rules})
         } catch (error) {
             req.session.errorMessage = error.message
+            return res.json({ redirect: "/user/services" })
         }
     }
 
     async getRequests(req, res) {
-        const userId = req.session.userId
-        const requests = await userService.getAllRequests(userId)
+        const requests = await userService.getAllRequests(req.session.userId)
         return res.json({"message": "Заявки получены", "requests": requests})
     }
 
@@ -92,9 +95,8 @@ class UserController {
 
     async submitRequest(req, res) {
         try {
-            const userId = req.session.userId
             const serviceId = req.params.serviceId
-            const request = await userService.createRequest(userId, serviceId)
+            const request = await userService.createRequest(req.session.userId, serviceId)
             return res.json({"message": "Заявка подана", "request": request})
         } catch (error) {
             req.session.errorMessage = error.message

@@ -1,1 +1,14 @@
 @import "./global.css";
+
+main {
+    width: min-content;
+    margin: 64px auto;
+    margin-top: 128px;
+}
+form {
+    display: flex;
+    gap: 12px;
+}
+button {
+    grid-column: span 2;
+}

@@ -24,12 +24,6 @@ app.use(session({
   }
 }))
 
-app.use((req, res, next) => {
-  res.locals.errorMessage = req.session.errorMessage || null
-  delete req.session.errorMessage
-  next()
-})
-
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
@@ -38,19 +32,25 @@ app.use(expressLayouts)
 app.set("views", path.join(__dirname, "views"))
 app.use(express.static(path.join(__dirname, "public")))
 
-app.get("/", (req, res) => res.redirect("/user/services"))
+app.use((req, res, next) => {
+  res.locals.errorMessage = req.session.errorMessage || null
+  delete req.session.errorMessage
+  next()
+})
+
+app.get("/", (req, res) => res.redirect("/user/profile"))
 
 app.get("/user/login", (req, res) => {
   res.render("login", {
     title: "Вход",
-    stylesheet: "authorization.css"
+    stylesheet: "auth.css"
   })
 })
 
 app.get("/user/signup", (req, res) => {
   res.render("signup", {
     title: "Регистрация",
-    stylesheet: "authorization.css"
+    stylesheet: "auth.css"
   })
 })
 
@@ -58,6 +58,13 @@ app.get("/user/services", authMiddleware, (req, res) => {
   res.render("services", {
     title: "Услуги",
     stylesheet: "services.css"
+  })
+})
+
+app.get("/user/services/:serviceId", authMiddleware, (req, res) => {
+  res.render("fullService", {
+    title: "Услуга",
+    stylesheet: "service.css"
   })
 })
 

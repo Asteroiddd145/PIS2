@@ -1,22 +1,20 @@
 @font-face {
     font-family: "Lato";
-    src: local('Lato'), local('Lato-Bold'), local('Lato Bold'),
-         url("../fonts/Lato-Bold.ttf") format("truetype"),
-         url("../fonts/Lato-Bold.woff2") format("woff");
+    src: local("Lato"), local("Lato-Bold"), local("Lato Bold"),
+         url("../fonts/Lato-Bold.ttf") format("truetype");
     font-weight: 700;
 }
 
 @font-face {
     font-family: "Lato";
-    src: local('Lato'), local('Lato-Regular'), local('Lato Regular'),
-         url("../fonts/Lato-Regular.ttf") format("truetype"),
-         url("../fonts/Lato-Regular.woff2") format("woff");
+    src: local("Lato"), local("Lato-Regular"), local("Lato Regular"),
+         url("../fonts/Lato-Regular.ttf") format("truetype");
     font-weight: 400;
 }
 
 @font-face {
     font-family: "Lato";
-    src: local('Lato'), local('Lato-Thin'), local('Lato Thin'),
-         url("../fonts/Lato-Thin") format("truetype");
+    src: local("Lato"), local("Lato-Thin"), local("Lato Thin"),
+         url("../fonts/Lato-Thin.ttf") format("truetype");
     font-weight: 300;
 }

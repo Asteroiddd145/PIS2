@@ -2,27 +2,29 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title><%= title || "Госуслуги" %></title>
+  <title><%= title || "Портал государственных услуг" %></title>
+  <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
   <% if (stylesheet) { %>
     <link rel="stylesheet" href="/css/<%= stylesheet %>">
   <% } %>
 </head>
 <body>
-  <%- include('partials/notification') %>
   <%- body %>
+  <%- include('partials/notification') %>
 </body>
 
 <script>
-  window.onload = () => {
-    const notification = document.querySelector('.notification.error')
-    if (notification) {
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.5s ease'
-        notification.style.opacity = '0'
-        setTimeout(() => notification.remove(), 500)
-      }, 5000)
-    }
+
+window.addEventListener("DOMContentLoaded", () => {
+  const notification = document.querySelector('.notification.error')
+  if (notification) {
+    setTimeout(() => {
+      notification.classList.add('hide')
+      setTimeout(() => notification.remove(), 500)
+    }, 3000)
   }
+})
+
 </script>
 
 </html>

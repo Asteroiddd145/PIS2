@@ -1,0 +1,87 @@
+<%- include('partials/header.ejs') %>
+<main>
+<section>
+  <h1>Профиль</h1>
+  <form id="profileForm">
+    <input type="text" name="firstName" placeholder="Имя" required />
+    <input type="text" name="lastName" placeholder="Фамилия" required />
+    <input type="text" name="patronymic" placeholder="Отчество" />
+    <input type="text" name="inn" id="innInput" placeholder="ИНН" maxlength="12" />
+    <input type="text" name="passportNumber" id="passportNumber" placeholder="Номер паспорта" maxlength="6" pattern="\d{6}" />
+    <input type="text" name="passportSeries" id="passportSeries" placeholder="Серия паспорта" maxlength="4" pattern="\d{4}" />
+    <input type="date" name="dateOfBirth" placeholder="Дата рождения" />
+    <input type="text" name="citizenship" placeholder="Гражданство" />
+    <input type="email" name="email" placeholder="Электронная почта" required />
+    <button type="submit">Сохранить</button>
+  </form>
+</section>
+</main>
+
+<script>
+document.getElementById("innInput").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 12)
+})
+
+document.getElementById("passportNumber").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 6)
+})
+
+document.getElementById("passportSeries").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 4)
+})
+
+window.addEventListener("DOMContentLoaded", () => {
+  fetch("/api/user/profile")
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`)
+      return res.json()
+    })
+    .then(data => {
+      const user = data.user
+      const form = document.getElementById("profileForm")
+
+      for (const [key, value] of Object.entries(user)) {
+        const input = form.elements.namedItem(key)
+        if (!input) continue
+
+        if (input.type === "date" && value) {
+          const localDate = new Date(value)
+          const year = localDate.getFullYear()
+          const month = String(localDate.getMonth() + 1).padStart(2, "0")
+          const day = String(localDate.getDate()).padStart(2, "0")
+          input.value = `${year}-${month}-${day}`
+        } else {
+          input.value = value || null
+        }
+      }
+    })
+    .catch(err => {
+      console.error("Ошибка при загрузке профиля:", err)
+    })
+})
+
+document.getElementById("profileForm").addEventListener("submit", function (e) {
+  e.preventDefault()
+
+  const form = e.target
+  const formData = new FormData(form)
+
+  const data = {}
+  for (const [key, value] of formData.entries()) {
+    data[key] = value
+  }
+
+  fetch("/api/user/profile", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка: ${res.status}`)
+      return res.json()
+    })
+})
+
+</script>

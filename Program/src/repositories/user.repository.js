@@ -33,6 +33,21 @@ class UserRepository {
         return null
     }
 
+    async findByAccountId(accountId) {
+        const result = await db.query(
+            "SELECT * FROM users WHERE account_id = $1", 
+            [accountId]
+        )
+
+        const row = result.rows[0]
+        if (row) {
+            console
+            const user = userConverter.fromDatabaseToUser(row)
+            return user
+        }
+        return null
+    }
+
     async save(user) {
         const accountResult = await db.query(
             "INSERT INTO accounts (login, password, role) VALUES ($1, $2, $3) RETURNING account_id",
