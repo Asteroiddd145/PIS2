@@ -1,5 +1,11 @@
 @import "./global.css";
 
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 main {
     width: min-content;
     margin: 64px auto;
@@ -7,8 +13,23 @@ main {
 }
 form {
     display: flex;
-    gap: 12px;
+    gap: 0;
+    label {
+        color: #4770EB;
+    }
+    input, .checkbox, select {
+        margin-bottom: 24px;
+    }
+    .checkbox {
+        input {
+            margin: 0;
+            margin-right: 4px;
+        }
+    }
 }
 button {
     grid-column: span 2;
+}
+.exit {
+    margin-bottom: 64px;
 }

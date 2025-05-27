@@ -1,5 +1,9 @@
 <% if (errorMessage) { %>
   <div class="notification error">
-    <p>Ошибка! <%= errorMessage %></p>
+    <p><strong>Ошибка!</strong> <%= errorMessage %></p>
+  </div>
+<% } else if (warningMessage) { %>
+  <div class="notification warning">
+    <p><strong>Внимание!</strong> <%= warningMessage %></p>
   </div>
 <% } %>

@@ -32,10 +32,17 @@ CREATE TABLE rules (
 	rule_id SERIAL PRIMARY KEY,
 	service_id SERIAL REFERENCES services(service_id),
 	description TEXT,
-	period INTEGER,
-	parameter VARCHAR(64),
-	logical_operator VARCHAR(64),
-	parameter_value VARCHAR(64)
+	period INTEGER
+);
+
+CREATE TABLE parameters (
+    parameter_id SERIAL PRIMARY KEY,
+    rule_id SERIAL REFERENCES rules(rule_id),
+	group_number INTEGER DEFAULT 0,
+	group_operator VARCHAR(4) DEFAULT 'AND',
+    parameter VARCHAR(64),
+    logical_operator VARCHAR(4) DEFAULT '=',
+    parameter_value VARCHAR(64)
 );
 
 CREATE TABLE requests (

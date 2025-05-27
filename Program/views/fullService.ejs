@@ -1,11 +1,12 @@
 <%- include('partials/header.ejs') %>
+
 <main>
 <div id="content">
 </div>
 </main>
 
 <script>
-
+  
 window.addEventListener("DOMContentLoaded", async () => {
   const pathParts = window.location.pathname.split("/")
   const serviceId = pathParts[pathParts.length - 1]
@@ -17,43 +18,72 @@ window.addEventListener("DOMContentLoaded", async () => {
     })
     .then(data => {
       if (data.redirect) {
-        window.location.href = data.redirect;
-        return;
-      } 
-      
+        window.location.href = data.redirect
+        return
+      }
+
       const { service, rules } = data
+      document.title = service.name || "Услуга"
       const container = document.getElementById("content")
 
+      const uniqueByPeriod = {}
+
+      rules.forEach(rule => {
+        if (!uniqueByPeriod[rule.period]) {
+          uniqueByPeriod[rule.period] = rule.description
+        }
+      })
+
+      const rulesTemplate = Object.entries(uniqueByPeriod).map(([period, description]) => {
+        return `
+          <ul class="rule-group">
+            <li>${description}</li>
+          </ul>
+        `
+      }).join("")
+
       const serviceTemplate = `
-          <h2 class="name">${service.name}</h2>
-          <div class="service_desc">
-            <h4>Описание услуги</h4>
-            <p>${service.serviceDescription}</p>
-          </div>
-          <div class="result_desc">
-            <h4>Описание результата</h4>
-            <p>${service.resultDescription}</p>
-          </div>
+        <h2 class="name">${service.name}</h2>
+        <div class="service_desc">
+          <h4>Описание услуги</h4>
+          <p>${service.serviceDescription}</p>
+        </div>
+        <div class="result_desc">
+          <h4>Описание результата</h4>
+          <p>${service.resultDescription}</p>
+        </div>
       `
 
-      const rulesTemplate = rules.length ? `
+      const finalRulesTemplate = rules.length ? `
         <div class="rules">
           <h4>Правила</h4>
-          <ul>
-            ${rules.map(rule => `
-              <li>
-                <p>${rule.description}</p>
-              </li>
-            `).join("")}
-          </ul>
+          ${rulesTemplate}
         </div>
-      ` : `
-      <div class="rules">
-        <p>Правил нет.</p>
-      </div>`
+      ` : `<div class="rules"><p>Правил нет.</p></div>`
 
-      container.innerHTML = serviceTemplate + rulesTemplate
+      const buttonTemplate = `
+        <div class="action">
+          <button id="submitRequestBtn">Подать заявку</button>
+        </div>
+      `
+
+      container.innerHTML = serviceTemplate + finalRulesTemplate + buttonTemplate
+
+      document.getElementById("submitRequestBtn").addEventListener("click", () => {
+        fetch(`/api/user/requests/service/${serviceId}`, {
+          method: "POST"
+        })
+          .then(res => {
+            if (!res.ok) throw new Error(`Ошибка: ${res.status}`)
+            return res.json()
+          })
+          .then(data => {
+            if (data.redirect) window.location.href = data.redirect
+          })
+          .catch(err => alert("Не удалось подать заявку: " + err.message))
+      })
     })
+
 })
 
 </script>

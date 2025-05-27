@@ -86,15 +86,39 @@ class UserNotExist extends Error {
     }
 }
 
-function matchAndRespondError(error, req, ...errorClasses) {
-    for (const errorClass of errorClasses) {
-        if (error instanceof errorClass) {
-            req.session.errorMessage = error.message
-            //return res.status(error.status || 400).json({ error: error.message })
-        }
+class UserDoesNotMeetRules extends Error {
+    constructor() {
+        super("Параметры пользователя не удовлетворяют ни одному правилу.")
+        this.name = "UserDoesNotMeetRulesError"
+        this.status = 400
     }
+}
 
-    req.session.errorMessage = "Неизвестная ошибка сервера."
+class RequestPeriodHasExpired extends Error {
+    constructor() {
+        super("Просрочен доступный период подачи заявки.")
+        this.name = "RequestPeriodHasExpiredError"
+        this.status = 400
+    }
+}
+
+class DateOfEntryIsNotSpecified extends Error {
+    constructor() {
+        super("Не указана дата въезда.")
+        this.name = "DateOfEntryIsNotSpecifiedError"
+        this.status = 400
+    }
+}
+
+function matchAndRespondError(error, req, ...errorClasses) {
+    //for (const errorClass of errorClasses) {
+    //    if (error instanceof errorClass) {
+    //        req.session.errorMessage = error.message
+    //        //return res.status(error.status || 400).json({ error: error.message })
+    //    }
+    //}
+
+    //req.session.errorMessage = "Неизвестная ошибка сервера."
     /*return res.status(500).json({
         error: {
             title: "Неизвестная ошибка сервера.",
@@ -117,5 +141,8 @@ module.exports = {
     RequestAlreadyBeingProcessed,
     LoginAlreadyExist,
     UserNotExist,
+    UserDoesNotMeetRules,
+    RequestPeriodHasExpired,
+    DateOfEntryIsNotSpecified,
     matchAndRespondError
 }

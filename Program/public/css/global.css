@@ -1,4 +1,4 @@
-*, html, input, button {
+*, html, input, button, label {
     font-family: "Lato", Helvetica, Arial, sans-serif;
 }
 body {
@@ -44,7 +44,6 @@ main {
 }
 .notification {
     position: fixed;
-    background: #EE3F58;
     bottom: 0;
     right: 0;
     margin: 32px;
@@ -58,27 +57,40 @@ main {
         margin: 0;
     }
 }
+.notification.error {
+    background: #EE3F58;
+}
+.notification.warning {
+    background: #0D4CD3;
+}
 .notification.hide {
     opacity: 0;
     pointer-events: none;
 }
 form {
-    width: 300px;
     display: flex;
     flex-direction: column;
     background: white;
-    
     border-radius: 12px;
-    gap: 10px;
-    label { 
-        font-size: 40px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 12px;
+    gap: 12px;
+    label {
+        font-size: 12px;
+        padding-left: 12px;
+        padding-bottom: 4px;
     }
-    input, button, .required {
+    .checkbox {
+        white-space: nowrap;
+    }
+    input, select, .checkbox, button, .required {
         padding: 16px 8px;
     }
+}
+.logo { 
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    margin-bottom: 12px;
 }
 .red {
     color: #EE3F58;
@@ -86,8 +98,8 @@ form {
 .blue {
     color: #0D4CD3;
 }
-input {
-    color: #66727f;
+input, select, .checkbox {
+    color: #323232;
     font-size: 14px;
     background: #F5F7FA;
     border: 2px solid transparent;
@@ -96,7 +108,7 @@ input {
     outline: none;
     transition: border-color 0.1s ease;
 }
-input:focus  {
+input:focus, select:focus  {
     color: rgb(32, 32, 32);
     border-color: #99B1E6;
 }

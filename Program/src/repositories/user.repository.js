@@ -55,16 +55,16 @@ class UserRepository {
         )
         const accountId = accountResult.rows[0].account_id
         const userResult = await db.query(
-            "INSERT INTO users (account_id, first_name, patronymic, last_name, inn, passport_number, passport_series, date_of_birth, citizenship, email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING user_id",
-            [accountId, user.firstName, user.patronymic, user.lastName, user.inn, user.passportNumber, user.passportSeries, user.dateOfBirth, user.citizenship, user.email]
+            "INSERT INTO users (account_id, first_name, last_name, email, purpose_of_arrival, is_hqs, is_compatriot_program_member, was_previously_registered, was_fingerprint_registration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING user_id",
+            [accountId, user.firstName, user.lastName, user.email, "other", false, false, false, false]
         )
         return userResult.rows[0].user_id
     }
 
     async update(userId, user) {
         await db.query(
-            "UPDATE users SET first_name = $1, patronymic = $2, last_name = $3, inn = $4, passport_number = $5, passport_series = $6, date_of_birth = $7, citizenship = $8, email = $9 WHERE user_id = $10",
-            [user.firstName, user.patronymic, user.lastName, user.inn, user.passportNumber, user.passportSeries, user.dateOfBirth, user.citizenship, user.email, userId]
+            "UPDATE users SET first_name = $1, patronymic = $2, last_name = $3, inn = $4, passport_number = $5, passport_series = $6, date_of_birth = $7, citizenship = $8, email = $9, purpose_of_arrival = $10, date_of_entry = $11, is_hqs = $12, is_compatriot_program_member = $13, was_previously_registered = $14, was_fingerprint_registration = $15 WHERE user_id = $16",
+            [user.firstName, user.patronymic, user.lastName, user.inn, user.passportNumber, user.passportSeries, user.dateOfBirth, user.citizenship, user.email, user.purposeOfArrival, user.dateOfEntry, user.isHQS, user.isCompatriotProgramMember, user.wasPreviouslyRegistered, user.wasFingerprintRegistration, userId]
         )
     }
 }

@@ -31,8 +31,7 @@ class UserController {
     async getUserProfile(req, res) {
         try {
             const user = await userService.getUser(req.session.userId)
-            console.log(user)
-            return res.json({"message": "Пользователь получен", "user": user})
+            return res.json({"user": user})
         } catch (error) {
             req.session.errorMessage = error.message
         }
@@ -44,34 +43,24 @@ class UserController {
             user.userId = req.session.userId
             const editingUser = userConverter.fromJsonToUser(user)
             await userService.updateUser(req.session.userId, editingUser)
-            res.redirect("/user/services")
+            req.session.warningMessage = "Профиль обновлён."
+            return res.json({ redirect: "/user/requests" })
         } catch (error) {
             req.session.errorMessage = error.message
-            res.redirect("/user/services")
+            return res.json({ redirect: "/user/requests" })
         }
     }
 
     async getServices(req, res) {
         const services = await userService.getAllActiveServices()
-        return res.json({"message": "Услуги получены", "services": services})
-    }
-
-    async getService(req, res) {
-        try {
-            const serviceId = req.params.serviceId
-            const service = await userService.getService(serviceId)
-            return res.json({"message": "Услуга получена", "service": service})
-        } catch (error) {
-            req.session.errorMessage = error.message
-            res.redirect("/user/services")
-        }
+        return res.json({"services": services})
     }
 
     async getServiceAndRules(req, res) {
         try {
             const serviceId = req.params.serviceId
             const {service, rules} = await userService.getServiceAndRules(serviceId)
-            return res.json({"message": "Услуга и её правила получены",  "service": service, "rules": rules})
+            return res.json({"service": service, "rules": rules})
         } catch (error) {
             req.session.errorMessage = error.message
             return res.json({ redirect: "/user/services" })
@@ -80,26 +69,18 @@ class UserController {
 
     async getRequests(req, res) {
         const requests = await userService.getAllRequests(req.session.userId)
-        return res.json({"message": "Заявки получены", "requests": requests})
-    }
-
-    async getRequest(req, res) {
-        try {
-            const requestId = req.params.requestId
-            const request = await userService.getRequest(requestId)
-            return res.json({"message": "Заявка получена", "request": request})
-        } catch (error) {
-            req.session.errorMessage = error.message
-        }
+        return res.json({"requests": requests})
     }
 
     async submitRequest(req, res) {
         try {
             const serviceId = req.params.serviceId
-            const request = await userService.createRequest(req.session.userId, serviceId)
-            return res.json({"message": "Заявка подана", "request": request})
+            await userService.createRequest(req.session.userId, serviceId)
+            req.session.warningMessage = "Заявка подана."
+            return res.json({ redirect: "/user/requests" })
         } catch (error) {
             req.session.errorMessage = error.message
+            return res.json({ redirect: "/user/profile" })
         }
     }
 
@@ -107,9 +88,11 @@ class UserController {
         try {
             const requestId = req.params.requestId
             await userService.cancelRequest(requestId)
-            return res.json({"message": "Заявка отменена"})
+            req.session.warningMessage = "Заявка отменена."
+            return res.json({ redirect: "/user/requests" })
         } catch (error) {
             req.session.errorMessage = error.message
+            return res.json({ redirect: "/user/requests" })
         }
     }
 }

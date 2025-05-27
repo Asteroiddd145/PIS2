@@ -30,7 +30,7 @@ class CivilServant {
             return res.json({"message": "Заявка получена", "request": request})
         } catch (error) {
             Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
-        }  
+        }
     }
 
     async getAllRequests(req, res) {

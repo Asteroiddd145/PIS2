@@ -34,7 +34,9 @@ app.use(express.static(path.join(__dirname, "public")))
 
 app.use((req, res, next) => {
   res.locals.errorMessage = req.session.errorMessage || null
+  res.locals.warningMessage = req.session.warningMessage || null
   delete req.session.errorMessage
+  delete req.session.warningMessage
   next()
 })
 
@@ -72,6 +74,21 @@ app.get("/user/profile", authMiddleware, (req, res) => {
   res.render("profile", {
     title: "Профиль",
     stylesheet: "profile.css"
+  })
+})
+
+app.get("/user/requests", authMiddleware, (req, res) => {
+  res.render("requests", {
+    title: "Заявки",
+    stylesheet: "requests.css"
+  })
+})
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) return res.status(500).send('Ошибка')
+    res.clearCookie('connect.sid')
+    res.redirect('/')
   })
 })
 

@@ -8,6 +8,9 @@ body {
     justify-content: center;
     align-items: center;
 }
+form {
+    width: 300px;
+}
 main {
     margin-top: 64px;
 }

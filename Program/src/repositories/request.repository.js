@@ -4,7 +4,7 @@ const requestConverter = require("../utilities/requestConverter")
 class RequestRepository {
     async getAll() {
         const result = await db.query(
-            "SELECT * FROM requests"
+            "SELECT * FROM requests ORDER BY date_of_submission"
         )
 
         const rows = result.rows
@@ -17,7 +17,7 @@ class RequestRepository {
 
     async getAllByStatus(status) {
         const result = await db.query(
-            "SELECT * FROM requests WHERE status = $1", 
+            "SELECT * FROM requests WHERE status = $1 ORDER BY date_of_submission", 
             [status]
         )
 

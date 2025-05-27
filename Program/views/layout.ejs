@@ -16,13 +16,12 @@
 <script>
 
 window.addEventListener("DOMContentLoaded", () => {
-  const notification = document.querySelector('.notification.error')
-  if (notification) {
+  document.querySelectorAll(".notification.error, .notification.warning").forEach(notification => {
     setTimeout(() => {
-      notification.classList.add('hide')
+      notification.classList.add("hide")
       setTimeout(() => notification.remove(), 500)
     }, 3000)
-  }
+  })
 })
 
 </script>

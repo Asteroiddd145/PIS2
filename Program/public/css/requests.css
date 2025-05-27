@@ -1,0 +1,36 @@
+@import "./global.css";
+
+.table {
+  display: flex;
+  flex-direction: column;
+  border: 1px dashed rgba(29,93,235,.18);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.row {
+  display: grid;
+  grid-template-columns: 3fr 2fr 5fr 1.5fr 1.5fr 1.5fr 1fr;
+  align-items: center;
+  padding: 12px;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.row.header {
+  font-weight: bold;
+  border-bottom: 1px dashed rgba(29, 93, 235, 0.18);
+}
+.row > div {
+  text-align: center;
+  overflow-wrap: break-word;
+}
+.cancel-btn {
+  color: #0D4CD3;
+  text-decoration: underline;
+  background: none;
+  cursor: pointer;
+  &:hover {
+    color: #4770EB;
+    background: none;
+  }
+}

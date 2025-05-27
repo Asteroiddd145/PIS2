@@ -1,87 +1,133 @@
 <%- include('partials/header.ejs') %>
+
 <main>
 <section>
   <h1>Профиль</h1>
   <form id="profileForm">
-    <input type="text" name="firstName" placeholder="Имя" required />
-    <input type="text" name="lastName" placeholder="Фамилия" required />
-    <input type="text" name="patronymic" placeholder="Отчество" />
-    <input type="text" name="inn" id="innInput" placeholder="ИНН" maxlength="12" />
-    <input type="text" name="passportNumber" id="passportNumber" placeholder="Номер паспорта" maxlength="6" pattern="\d{6}" />
-    <input type="text" name="passportSeries" id="passportSeries" placeholder="Серия паспорта" maxlength="4" pattern="\d{4}" />
-    <input type="date" name="dateOfBirth" placeholder="Дата рождения" />
-    <input type="text" name="citizenship" placeholder="Гражданство" />
-    <input type="email" name="email" placeholder="Электронная почта" required />
+    <label for="firstName">Имя</label>
+    <input type="text" name="firstName" required />
+    <label for="lastName">Фамилия</label>
+    <input type="text" name="lastName" required />
+    <label for="patronymic">Отчество</label>
+    <input type="text" name="patronymic"/>
+    <label for="inn">ИНН</label>
+    <input type="text" name="inn" id="innInput" maxlength="12" />
+    <label for="passportNumber">Номер паспорта</label>
+    <input type="text" name="passportNumber" id="passportNumber" maxlength="6" pattern="\d{6}" />
+    <label for="passportSeries">Серия паспорта</label>
+    <input type="text" name="passportSeries" id="passportSeries" maxlength="4" pattern="\d{4}" />
+    <label for="dateOfBirth">Дата рождения</label>
+    <input type="date" name="dateOfBirth" />
+    <label for="citizenship">Гражданство</label>
+    <input type="text" name="citizenship" />
+    <label for="email">Электронная почта</label>
+    <input type="email" name="email" required />
+    <label for="purposeOfArrival">Цель въезда</label>
+    <select name="purposeOfArrival" id="purposeOfArrival" required>
+      <option value="work">Трудоустройство</option>
+      <option value="other">Другая</option>
+    </select>
+    <label for="dateOfEntry">Дата въезда в страну</label>
+    <input type="date" name="dateOfEntry" />
+    <label class="checkbox">
+      <input type="checkbox" name="isHQS" />
+      Высококвалифицированный специалист
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="isCompatriotProgramMember" />
+      Участник госпрограммы переселения
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="wasPreviouslyRegistered" />
+      Ранее находился на миграционном учёте
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="wasFingerprintRegistration" />
+      Проводилась дактилоскопическая регистрация
+    </label>
     <button type="submit">Сохранить</button>
   </form>
 </section>
 </main>
+<div class="exit">
+  <a href="/logout">Выйти из аккаунта</a>
+</div>
 
 <script>
-document.getElementById("innInput").addEventListener("input", function () {
+  // Ограничение ввода цифр
+  document.getElementById("innInput").addEventListener("input", function () {
     this.value = this.value.replace(/\D/g, "").slice(0, 12)
-})
-
-document.getElementById("passportNumber").addEventListener("input", function () {
-    this.value = this.value.replace(/\D/g, "").slice(0, 6)
-})
-
-document.getElementById("passportSeries").addEventListener("input", function () {
-    this.value = this.value.replace(/\D/g, "").slice(0, 4)
-})
-
-window.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/user/profile")
-    .then(res => {
-      if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`)
-      return res.json()
-    })
-    .then(data => {
-      const user = data.user
-      const form = document.getElementById("profileForm")
-
-      for (const [key, value] of Object.entries(user)) {
-        const input = form.elements.namedItem(key)
-        if (!input) continue
-
-        if (input.type === "date" && value) {
-          const localDate = new Date(value)
-          const year = localDate.getFullYear()
-          const month = String(localDate.getMonth() + 1).padStart(2, "0")
-          const day = String(localDate.getDate()).padStart(2, "0")
-          input.value = `${year}-${month}-${day}`
-        } else {
-          input.value = value || null
-        }
-      }
-    })
-    .catch(err => {
-      console.error("Ошибка при загрузке профиля:", err)
-    })
-})
-
-document.getElementById("profileForm").addEventListener("submit", function (e) {
-  e.preventDefault()
-
-  const form = e.target
-  const formData = new FormData(form)
-
-  const data = {}
-  for (const [key, value] of formData.entries()) {
-    data[key] = value
-  }
-
-  fetch("/api/user/profile", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
   })
-    .then(res => {
-      if (!res.ok) throw new Error(`Ошибка: ${res.status}`)
-      return res.json()
-    })
-})
 
+  document.getElementById("passportNumber").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 6)
+  })
+
+  document.getElementById("passportSeries").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 4)
+  })
+
+  // Загрузка данных в форму
+  window.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/user/profile")
+      .then(res => {
+        if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`)
+        return res.json()
+      })
+      .then(data => {
+        const user = data.user
+        const form = document.getElementById("profileForm")
+
+        for (const [key, value] of Object.entries(user)) {
+          const input = form.elements.namedItem(key)
+          if (!input) continue
+
+          if (input.tagName === "SELECT") {
+            const optionExists = Array.from(input.options).some(opt => opt.value === value)
+            input.value = optionExists ? value : ""
+          } else if (input.type === "checkbox") {
+            input.checked = Boolean(value)
+          } else if (input.type === "date" && value) {
+            const localDate = new Date(value)
+            const year = localDate.getFullYear()
+            const month = String(localDate.getMonth() + 1).padStart(2, "0")
+            const day = String(localDate.getDate()).padStart(2, "0")
+            input.value = `${year}-${month}-${day}`
+          } else {
+            input.value = value || ""
+          }
+        }
+      })
+  })
+
+  document.getElementById("profileForm").addEventListener("submit", function (e) {
+    e.preventDefault()
+
+    const form = e.target
+    const formData = new FormData(form)
+
+    const data = {}
+    for (const [key, value] of formData.entries()) {
+      data[key] = value
+    }
+
+    form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      data[checkbox.name] = checkbox.checked
+    })
+
+    fetch("/api/user/profile", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Ошибка: ${res.status}`)
+        return res.json()
+      })
+      .then(result => {
+        window.location.reload()
+      })
+  })
 </script>

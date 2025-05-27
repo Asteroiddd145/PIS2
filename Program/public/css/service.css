@@ -17,3 +17,9 @@
         margin-bottom: 12px;
     }
 }
+.action {
+    button {
+        width: 300px;
+        padding: 16px;
+    }
+}
