@@ -1,42 +1,46 @@
 const civilServantService = require("../services/civilServant.service")
-const Errors = require("../errors")
 
 class CivilServant {
     async logIn(req, res) {
         try {
             const {login, password} = req.body
-            await civilServantService.tryLogin(login, password)
-            return res.json({"message": "Вход выполнен"})
+            const civilServantId = await civilServantService.tryLogin(login, password)
+            req.session.civilServantId = civilServantId
+            req.session.save()
+            res.redirect("/civilservant/requests")
         } catch (error) {
-            Errors.matchAndRespondError(error, req, Errors.AccountNotExist, Errors.AccountWrongPassword)
+            req.session.errorMessage = error.message
+            res.redirect("/admin/login")
         }
     }
 
     async processRequest(req, res) {
         try {
-            const civilServantId = req.params.id
             const requestId = req.params.requestId
-            await civilServantService.linkRequestWithResponsible(civilServantId, requestId)
-            return res.json({"message": "Заявка готова к обработке"})
+            await civilServantService.linkRequestWithResponsible(req.session.civilServantId, requestId)
+            return res.json({ redirect: `/civilservant/requests/${requestId}`})
         } catch (error) {
-            Errors.matchAndRespondError(error, req, Errors.RequestNotExist, Errors.RequestNotAvailable)
+            req.session.errorMessage = error.message
+            return res.json({ redirect: `/civilservant/requests`})
         }
     }
 
     async getRequest(req, res) {
         try {
             const requestId = req.params.requestId
-            const request = await civilServantService.getRequest(requestId)
-            return res.json({"message": "Заявка получена", "request": request})
+            const requestAndService = await civilServantService.getRequest(requestId)
+            return res.json(requestAndService)
         } catch (error) {
-            Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
+            req.session.errorMessage = error.message
+            res.redirect("/civilservant/requests")
         }
     }
 
     async getAllRequests(req, res) {
-        const status = req.body.status  
-        const requestList = await civilServantService.getAllRequestsByStatus(status)
-        return res.json({"message": "Все заявки по статусу получены", "requests": requestList})
+        const status = req.query.status
+        const needCivilServantId = req.query.need
+        const requests = await civilServantService.getAllRequestsByStatus(status, needCivilServantId ? req.session.civilServantId : null)
+        return res.json({"requests": requests})
     }
 
     async changeRequestStatus(req, res) {
@@ -44,9 +48,11 @@ class CivilServant {
             const requestId = req.params.requestId
             const status = req.body.status
             await civilServantService.changeRequestStatus(requestId, status)
-            return res.json({"message": "Статус изменён"})
+            req.session.warningMessage = "Статус изменён."
+            return res.json({ redirect: `/civilservant/requests/${requestId}`})
         } catch (error) {
-            Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
+            req.session.errorMessage = error.message
+            return res.json({ redirect: `/civilservant/requests/${requestId}`})
         }
     }
 
@@ -55,9 +61,10 @@ class CivilServant {
             const requestId = req.params.requestId
             const result = req.body.result
             await civilServantService.attachRequestResult(requestId, result)
-            return res.json({"message": "Результат прикреплён"})
+            req.session.warningMessage = "Результат прикреплён."
+            return res.json({ redirect: `/civilservant/requests/${requestId}`})
         } catch (error) {
-            Errors.matchAndRespondError(error, req, Errors.RequestNotExist)
+            return res.json({ redirect: `/civilservant/requests/${requestId}`})
         }
     }
 }

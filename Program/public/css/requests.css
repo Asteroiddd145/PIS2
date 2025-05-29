@@ -34,3 +34,45 @@
     background: none;
   }
 }
+.requestsContainer {
+  text-wrap: nowrap;
+  a {
+    font-size: 20px;
+    padding: 0;
+  }
+}
+.request {
+  margin: 8px 0;
+}
+.status, .result {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+.status button, .result button {
+  width: 300px;
+  height: min-content;
+  flex-shrink: 0;
+}
+.status select, .result textarea {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  min-width: 0;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+}
+p:first-child {
+  margin-top: 0;
+}
+.button {
+  display: none;
+}
+#processRequestBtn {
+  height: min-content;
+  width: 300px;
+  padding: 16px 8px;
+  margin: 22px 0;
+}

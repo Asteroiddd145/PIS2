@@ -1,5 +1,6 @@
 const requestStatus = require("../constants/requestStatus")
 const civilServantRepository = require("../repositories/civilServant.repository")
+const serviceRepository = require("../repositories/service.repository")
 const requestRepository = require("../repositories/request.repository")
 const Errors = require("../errors")
 
@@ -8,7 +9,7 @@ class CivilServantService {
         const civilServant = await civilServantRepository.findByLogin(login)
         if (civilServant) {
             if (civilServant.password === password) {
-                return true
+                return civilServant.accountId
             } else {
                 throw new Errors.AccountWrongPassword()
             }
@@ -34,22 +35,35 @@ class CivilServantService {
 
     async getRequest(requestId) {
         const request = await requestRepository.findById(requestId)
+        const service = await serviceRepository.findById(request.serviceId)
         if (request) {
-            return request
+            return  { request, service }
         } else {
             throw new Errors.RequestNotExist()
         }
     }
 
-    async getAllRequestsByStatus(status) {
-        const list = await requestRepository.getAllByStatus(status)
-        return list
+    async getAllRequestsByStatus(status, civilServantId) {
+        const requests = await requestRepository.getAllByStatus(status, civilServantId)
+        const allServices = await serviceRepository.getAll()
+        const requestsWithServices = requests.map(request => {
+            const service = allServices.find(s => s.serviceId === request.serviceId)
+            return { request, service }
+        })
+
+        return requestsWithServices
     }
+
 
     async changeRequestStatus(requestId, status) {
         const request = await requestRepository.findById(requestId)
         if (request) {
             request.status = status
+            if (status === requestStatus.DONE || status === requestStatus.REJECTED) {
+                request.dateOfCompletion = new Date()
+            } else if (status === requestStatus.IN_PROGRESS) {
+                request.dateOfCompletion = null
+            }
             await requestRepository.update(requestId, request)
         } else {
             throw new Errors.RequestNotExist()

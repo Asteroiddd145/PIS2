@@ -1,0 +1,28 @@
+@import "./global.css";
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+main {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+a {
+    color: white;
+    background: #0D4CD3;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 12px;
+    padding: 12px;
+}
+a:hover {
+    color: white;
+    background: #EE3F58;
+}

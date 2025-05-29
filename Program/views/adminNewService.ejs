@@ -1,0 +1,204 @@
+<%- include('partials/adminHeader.ejs') %>
+
+<main>
+    <div><h2>Новая услуга</h2></div>
+    <form id="serviceForm">
+        <div class="form-item">
+        <label for="serviceName">Название услуги</label>
+        <input type="text" id="serviceName" name="name" required />
+        </div>
+
+        <div class="form-item">
+        <label for="serviceDescription">Описание услуги</label>
+        <textarea id="serviceDescription" name="serviceDescription" required></textarea>
+        </div>
+
+        <div class="form-item">
+        <label for="resultDescription">Описание результата</label>
+        <textarea id="resultDescription" name="resultDescription" required></textarea>
+        </div>
+
+        <section class="formrules">
+        <div id="rulesContainer"></div>
+
+        <div class="add-rule">
+            <button type="button" onclick="addRule()">Добавить новое правило</button>
+        </div>
+        </section>
+
+    <button type="submit">Сохранить услугу</button>
+  </form>
+
+  <template id="ruleTemplate">
+    <div class="rule-block">
+      <h2>Правило</h2>
+      <form class="ruleForm" onsubmit="event.preventDefault(); saveRule(this)">
+        <div class="rule-grid">
+          <div class="form-item">
+            <label>Описание</label>
+            <textarea name="description" required></textarea>
+          </div>
+          <div class="form-item">
+            <label>Период</label>
+            <input type="number" name="period" required />
+          </div>
+        </div>
+
+        <h4>Параметры</h4>
+        <div class="paramContainer"></div>
+
+        <div class="rule-buttons">
+          <button type="button" onclick="removeRule(this)">Удалить правило</button>
+          <button type="button" onclick="addParam(this)">Добавить параметр</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <template id="paramTemplate">
+    <div class="param-block param-grid">
+      <div class="form-item">
+        <label>Группа</label>
+        <input type="number" name="groupNumber" value="0" required />
+      </div>
+      <div class="form-item">
+        <label>Оператор группы</label>
+        <select name="groupOperator">
+          <option value="AND">И</option>
+          <option value="OR">ИЛИ</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Параметр</label>
+        <select name="parameter">
+          <option value="">Нет</option>
+          <option value="citizenship">Гражданство</option>
+          <option value="isHQS">Высококвалифицированный специалист</option>
+          <option value="wasPreviouslyRegistered">Ранее находился на миграционном учёте</option>
+          <option value="isCompatriotProgramMember">Участник госпрограммы переселения</option>
+          <option value="purposeOfArrival">Цель въезда</option>
+          <option value="wasFingerprintRegistration">Проводилась дактилоскопическая регистрация</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Оператор параметра</label>
+        <select name="parameterOperator">
+          <option value="">Нет</option>
+          <option value="=">Равно</option>
+          <option value="!=">Не равно</option>
+          <option value=">">Больше</option>
+          <option value="<">Меньше</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Значение параметра</label>
+        <input type="text" name="parameterValue" />
+      </div>
+      <div class="form-item">
+        <label>&nbsp;</label>
+        <button type="button" class="remove-button" onclick="removeParam(this)">Удалить</button>
+      </div>
+    </div>
+  </template>
+</main>
+
+<script>
+
+function createParamElement(param = {}) {
+    const template = document.getElementById("paramTemplate")
+    const clone = template.content.cloneNode(true)
+    clone.querySelector('input[name="groupNumber"]').value = param.groupNumber ?? 0
+    clone.querySelector('select[name="groupOperator"]').value = param.groupOperator ?? "AND"
+    clone.querySelector('select[name="parameter"]').value = param.parameter ?? ""
+    clone.querySelector('select[name="parameterOperator"]').value = param.parameterOperator ?? ""
+    clone.querySelector('input[name="parameterValue"]').value = param.parameterValue ?? ""
+    return clone
+}
+
+function createRuleElement(rule = {}) {
+    const template = document.getElementById("ruleTemplate")
+    const clone = template.content.cloneNode(true)
+    const form = clone.querySelector("form.ruleForm")
+    form.querySelector('textarea[name="description"]').value = rule.description || ""
+    form.querySelector('input[name="period"]').value = rule.period || ""
+
+    const paramContainer = form.querySelector(".paramContainer")
+    paramContainer.innerHTML = ""
+    if (rule.parameters && rule.parameters.length > 0) {
+        rule.parameters.forEach(param => {
+        paramContainer.appendChild(createParamElement(param))
+        })
+    } else {
+        paramContainer.appendChild(createParamElement())
+    }
+    return clone
+}
+
+function addRule() {
+    const container = document.getElementById("rulesContainer")
+    const ruleEl = createRuleElement()
+    container.appendChild(ruleEl)
+}
+
+function addParam(button) {
+    const ruleBlock = button.closest(".rule-block")
+    const container = ruleBlock.querySelector(".paramContainer")
+    container.appendChild(createParamElement())
+}
+
+function removeParam(button) {
+    const paramBlock = button.closest(".param-block")
+    const container = paramBlock.parentNode
+    if (container.querySelectorAll(".param-block").length > 1) {
+        container.removeChild(paramBlock)
+    }
+}
+
+function removeRule(button) {
+    const ruleBlock = button.closest(".rule-block")
+    ruleBlock.remove()
+}
+
+document.getElementById("serviceForm").addEventListener("submit", async e => {
+    e.preventDefault()
+
+    const form = e.target
+    const name = form.name.value.trim()
+    const serviceDescription = form.serviceDescription.value.trim()
+    const resultDescription = form.resultDescription.value.trim()
+
+    const rules = []
+    const ruleForms = document.querySelectorAll(".ruleForm")
+    ruleForms.forEach(ruleForm => {
+        const description = ruleForm.querySelector('textarea[name="description"]').value.trim()
+        const period = Number(ruleForm.querySelector('input[name="period"]').value)
+
+        if (!description || !period) return
+
+        const paramBlocks = ruleForm.querySelectorAll(".param-block")
+        const parameters = Array.from(paramBlocks).map(block => ({
+        groupNumber: Number(block.querySelector('input[name="groupNumber"]').value),
+        groupOperator: block.querySelector('select[name="groupOperator"]').value,
+        parameter: block.querySelector('select[name="parameter"]').value || null,
+        parameterOperator: block.querySelector('select[name="parameterOperator"]').value || null,
+        parameterValue: block.querySelector('input[name="parameterValue"]').value.trim() || null
+        }))
+
+        rules.push({ description, period, parameters })
+    })
+
+    try {
+        const response = await fetch("/api/admin/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service: { name, serviceDescription, resultDescription }, rules }),
+        })
+
+        if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`)
+
+        window.location.href = "/admin/services"
+    } catch (error) {
+        alert(error.message)
+    }
+})
+</script>

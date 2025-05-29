@@ -1,0 +1,87 @@
+<%- include('partials/civilSevantHeader.ejs') %>
+
+<main>
+    <h1>Заявки</h1>
+
+    <label for="statusFilter">Фильтр по статусу:</label>
+    <select id="statusFilter">  
+        <option value="">...</option>
+        <option value="IN_PROGRESS">В обработке</option>
+        <option value="DONE">Выполнено</option>
+        <option value="REJECTED">Отказано</option>  
+    </select>
+
+    <div class="requestsContainer">
+      <h2>Фильтрованные заявки</h2>
+      <div id="filteredRequestsContainer"></div>
+    </div>
+
+    <div class="requestsContainer">
+      <h2>Доступные для обработки заявки</h2>
+      <div id="waitingRequestsContainer"></div>
+    </div>
+</main>
+
+<script>
+
+const translateStatus = status => ({
+    WAITING: "На рассмотрении",
+    IN_PROGRESS: "В обработке",
+    DONE: "Выполнено",
+    REJECTED: "Отказано",
+    CANCELLED: "Отменено"
+}[status] || "Неизвестно")
+
+function renderRequests(container, requests) {
+    container.innerHTML = ""
+    if (!requests.length) {
+        container.innerHTML = "<p>Нет заявок по выбранному фильтру.</p>"
+        return
+    }
+
+    requests.forEach(({ request, service }) => {
+        const requestHTML = `
+            <div class="request">
+                <a href="/civilservant/requests/${request.requestId}" class="row short-row">
+                    Заявка №${request.requestId} — ${service.name}
+                </a>
+            </div>
+        `
+        const wrapper = document.createElement("div")
+        wrapper.innerHTML = requestHTML.trim()
+        container.appendChild(wrapper.firstChild)
+    })
+}
+
+function loadRequests(status = "") {
+    const filteredContainer = document.getElementById("filteredRequestsContainer")
+    const waitingContainer = document.getElementById("waitingRequestsContainer")
+
+    let filteredUrl = "/api/civilservant/requests"
+    if (status) filteredUrl += `?status=${encodeURIComponent(status)}`
+
+    const waitingUrl = "/api/civilservant/requests?status=WAITING"
+
+    Promise.all([
+        fetch(filteredUrl),
+        fetch(waitingUrl)
+    ])
+    .then(async ([filteredRes, waitingRes]) => {
+        if (!filteredRes.ok) throw new Error(`Ошибка сервера (фильтр): ${filteredRes.status}`)
+        if (!waitingRes.ok) throw new Error(`Ошибка сервера (на рассмотрении): ${waitingRes.status}`)
+
+        const filteredData = await filteredRes.json()
+        const waitingData = await waitingRes.json()
+
+        renderRequests(filteredContainer, filteredData.requests || [])
+        renderRequests(waitingContainer, waitingData.requests || [])
+    })
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const filter = document.getElementById("statusFilter")
+    filter.addEventListener("change", () => loadRequests(filter.value))
+    loadRequests()
+})
+
+</script>

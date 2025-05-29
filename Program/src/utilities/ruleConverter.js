@@ -2,11 +2,29 @@ const Rule = require("../models/rule")
 const Parameter = require("../models/parameter")
 
 function fromJsonToRule(data) {
-    return new Rule(data.ruleId, data.serviceId, data.description, data.period)
+    const ruleId = data.ruleId
+
+    const parameters = Array.isArray(data.parameters)
+        ? data.parameters.map(p => {
+            if (!p.ruleId) p.ruleId = ruleId
+            return fromJsonToParameter(p)
+        })
+        : []
+
+    return new Rule(ruleId, data.serviceId, data.description, data.period, parameters)
 }
 
 function fromDatabasetoRule(data) {
-    return new Rule(data.rule_id, data.service_id, data.description, data.period)
+    const ruleId = data.rule_id
+
+    const parameters = Array.isArray(data.parameters)
+        ? data.parameters.map(p => {
+            if (!p.rule_id) p.rule_id = ruleId
+            return fromDatabasetoParameter(p)
+        })
+        : []
+
+    return new Rule(ruleId, data.service_id, data.description, data.period, parameters)
 }
 
 function fromJsonToParameter(data) {

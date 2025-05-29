@@ -5,7 +5,7 @@
     flex-direction: column;
     gap: 12px;
 }
-.service_desc, .result_desc, .rules {
+.service_desc, .result_desc, .rules, .validity_dates {
     border: 1px dashed rgba(29,93,235,.18);
     border-radius: 12px;
     padding: 24px;
@@ -21,5 +21,65 @@
     button {
         width: 300px;
         padding: 16px;
+    }
+}
+.validity_dates {
+    button {
+        width: 300px;
+        margin-top: 12px;
+        padding: 16px 8px;
+    }
+}
+.formrules {
+    border: 1px dashed rgba(29,93,235,.18);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 12px;
+    h2 {
+        margin-top: 0;
+    }
+    #rulesContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .rule-block {
+        border: 1px dashed rgba(29,93,235,.18);
+        border-radius: 12px;
+        padding: 12px;
+    }
+}
+.rule-grid {
+    display: grid;
+    grid-template-columns: 6fr 1fr;
+    gap: 1rem;
+    margin-bottom: 12px;
+}
+.param-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 2fr 1.5fr 2fr 1fr;
+    gap: 12px;
+    div:first-child {
+        width: 120px;
+    }
+}
+.form-item {
+    display: flex;
+    flex-direction: column;
+}
+textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+.rule-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.add-rule {
+    button {
+        width: 100%;
+        margin-top: 32px;
+        padding: 16px 8px;
     }
 }

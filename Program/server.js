@@ -9,7 +9,9 @@ const adminRouter = require("./src/routes/admin.routes")
 const civilServantRouter = require("./src/routes/civilServant.routes")
 const userRouter = require("./src/routes/user.routes")
 
-const authMiddleware = require("./src/middleware/authMiddleware")
+const authUserMiddleware = require("./src/middleware/authUserMiddleware")
+const authAdminMiddleware = require("./src/middleware/authAdminMiddleware")
+const authCivilServantMiddleware = require("./src/middleware/authCivilServantMiddleware")
 
 const app = express()
 
@@ -40,12 +42,22 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get("/", (req, res) => res.redirect("/user/profile"))
+app.get("/", (req, res) => {
+  res.render("choice", {
+    title: "Выбор роли",
+    stylesheet: "choice.css"
+  })
+})
+
+//#region user
 
 app.get("/user/login", (req, res) => {
   res.render("login", {
     title: "Вход",
-    stylesheet: "auth.css"
+    stylesheet: "auth.css",
+    api: "/api/user/login",
+    link: "/user/login",
+    additional: '<div><a href="/user/signup">Зарегистрироваться</a></div>'
   })
 })
 
@@ -56,29 +68,29 @@ app.get("/user/signup", (req, res) => {
   })
 })
 
-app.get("/user/services", authMiddleware, (req, res) => {
-  res.render("services", {
+app.get("/user/services", authUserMiddleware, (req, res) => {
+  res.render("userServices", {
     title: "Услуги",
     stylesheet: "services.css"
   })
 })
 
-app.get("/user/services/:serviceId", authMiddleware, (req, res) => {
-  res.render("fullService", {
+app.get("/user/services/:serviceId", authUserMiddleware, (req, res) => {
+  res.render("userFullService", {
     title: "Услуга",
     stylesheet: "service.css"
   })
 })
 
-app.get("/user/profile", authMiddleware, (req, res) => {
+app.get("/user/profile", authUserMiddleware, (req, res) => {
   res.render("profile", {
     title: "Профиль",
     stylesheet: "profile.css"
   })
 })
 
-app.get("/user/requests", authMiddleware, (req, res) => {
-  res.render("requests", {
+app.get("/user/requests", authUserMiddleware, (req, res) => {
+  res.render("userRequests", {
     title: "Заявки",
     stylesheet: "requests.css"
   })
@@ -91,6 +103,71 @@ app.get('/logout', (req, res) => {
     res.redirect('/')
   })
 })
+
+//#endregion
+
+//#region admin
+
+app.get("/admin/login", (req, res) => {
+  res.render("login", {
+    title: "Вход",
+    stylesheet: "auth.css",
+    api: "/api/admin/login",
+    link: "/admin/login",
+    additional: ""
+  })
+})
+
+app.get("/admin/services", authAdminMiddleware, (req, res) => {
+  res.render("adminServices", {
+    title: "Услуги",
+    stylesheet: "services.css"
+  })
+})
+
+app.get("/admin/services/new-service", authAdminMiddleware, (req, res) => {
+  res.render("adminNewService", {
+    title: "Новая услуга",
+    stylesheet: "service.css"
+  })
+})
+
+app.get("/admin/services/:serviceId", authAdminMiddleware, (req, res) => {
+  res.render("adminFullService", {
+    title: "Услуга",
+    stylesheet: "service.css"
+  })
+})
+
+//#endregion
+
+//#region civil servant
+
+app.get("/civilservant/login", (req, res) => {
+  res.render("login", {
+    title: "Вход",
+    stylesheet: "auth.css",
+    api: "/api/civilservant/login",
+    link: "/civilservant/login",
+    additional: ""
+  })
+})
+
+app.get("/civilservant/requests", (req, res) => {
+  res.render("civilServantRequests", {
+    title: "Заявки",
+    stylesheet: "requests.css"
+  })
+})
+
+app.get("/civilservant/requests/:requestId", (req, res) => {
+  res.render("civilServantRequest", {
+    title: "Заявка",
+    stylesheet: "requests.css"
+  })
+})
+
+//#endregion
 
 app.use("/api/admin", adminRouter)
 app.use("/api/civilservant", civilServantRouter)

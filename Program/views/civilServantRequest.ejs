@@ -1,0 +1,139 @@
+<%- include('partials/civilSevantHeader.ejs') %>
+
+<main>
+    <div class="head">
+        <h1>Заявка №<span id="requestId"></span></h1>
+        <button type="button" id="processRequestBtn" class="button">Обработать заявку</button>
+    </div>
+    <div id="requestInfo">
+        <p><strong>Услуга:</strong> <span id="serviceName">Загрузка...</span></p>
+        <p><strong>Дата подачи:</strong> <span id="dateOfSubmission">—</span></p>
+        <p><strong>Планируемое завершение:</strong> <span id="plannedCompletionDate">—</span></p>
+        <p><strong>Дата завершения:</strong> <span id="dateOfCompletion">—</span></p>
+    </div>
+    <form id="editForm">
+        <label for="status">Статус:</label>
+        <div class="status">
+            <select id="status" name="status" required>
+                <option value="IN_PROGRESS">В обработке</option>
+                <option value="DONE">Выполнено</option>
+                <option value="REJECTED">Отказано</option>
+            </select>
+            <button type="button" id="saveStatusBtn" class="button">Сохранить статус</button>
+        </div>
+        <label for="result">Результат:</label>
+        <div class="result">
+            <textarea id="result" name="result" rows="5"></textarea>
+            <button type="button" id="saveResultBtn" class="button">Сохранить результат</button>
+        </div>
+    </form>
+</main>
+
+<script>
+  const pathParts = window.location.pathname.split("/")
+  const requestId = pathParts[pathParts.length - 1]
+  document.getElementById("requestId").textContent = requestId
+
+  function translateStatus(status) {
+    return {
+      IN_PROGRESS: "В обработке",
+      DONE: "Выполнено",
+      REJECTED: "Отказано",
+    }[status] || "Неизвестно"
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "—"
+    const date = new Date(dateStr)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}.${month}.${year}`
+  }
+
+  fetch(`/api/civilservant/requests/${requestId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+      return res.json()
+    })
+    .then(data => {
+      const { request, service } = data
+      document.getElementById("serviceName").textContent = service?.name || "—"
+      document.getElementById("dateOfSubmission").textContent = formatDate(request.dateOfSubmission)
+      document.getElementById("plannedCompletionDate").textContent = formatDate(request.plannedCompletionDate)
+      document.getElementById("dateOfCompletion").textContent = formatDate(request.dateOfCompletion)
+
+      const statusSelect = document.getElementById("status")
+      const resultTextarea = document.getElementById("result")
+      const processBtn = document.getElementById("processRequestBtn")
+      const saveStatusBtn = document.getElementById("saveStatusBtn")
+      const saveResultBtn = document.getElementById("saveResultBtn")
+
+      const currentStatus = request.status || "WAITING"
+      statusSelect.value = currentStatus
+      resultTextarea.value = request.result || ""
+
+      const isWaiting = currentStatus === "WAITING"
+
+      processBtn.style.display = isWaiting ? "inline-block" : "none"
+      saveStatusBtn.style.display = isWaiting ? "none" : "inline-block"
+      saveResultBtn.style.display = isWaiting ? "none" : "inline-block"
+
+      statusSelect.disabled = isWaiting
+      resultTextarea.disabled = isWaiting
+
+      if (!isWaiting) {
+        saveStatusBtn.addEventListener("click", () => {
+          const updatedStatus = statusSelect.value
+          fetch(`/api/civilservant/requests/${requestId}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: updatedStatus })
+          })
+            .then(res => {
+              if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+              return res.json()
+            })
+            .then(data => {
+              if (data.redirect) {
+                window.location.href = data.redirect
+              }
+            })
+        })
+
+        saveResultBtn.addEventListener("click", () => {
+          const updatedResult = resultTextarea.value
+          fetch(`/api/civilservant/requests/${requestId}/result`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ result: updatedResult })
+          })
+            .then(res => {
+              if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+              return res.json()
+            })
+            .then(data => {
+              if (data.redirect) {
+                window.location.href = data.redirect
+              }
+            })
+        })
+      }
+  })
+
+  document.getElementById("processRequestBtn").addEventListener("click", () => {
+    fetch(`/api/civilservant/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+        return res.json()
+      })
+      .then(data => {
+        if (data.redirect) {
+          window.location.href = data.redirect
+        }
+      })
+  })
+</script>

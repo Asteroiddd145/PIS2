@@ -1,4 +1,4 @@
-*, html, input, button, label {
+*, html, input, textarea, button, label {
     font-family: "Lato", Helvetica, Arial, sans-serif;
 }
 body {
@@ -33,6 +33,9 @@ header {
         gap: 24px;
         list-style: none;
     }
+}
+.admin, .civil-servant {
+    justify-content: center;
 }
 main {
     background: white;
@@ -81,9 +84,12 @@ form {
     .checkbox {
         white-space: nowrap;
     }
-    input, select, .checkbox, button, .required {
+    input, textarea, select, .checkbox, button, .required {
         padding: 16px 8px;
     }
+}
+textarea {
+  resize: vertical;
 }
 .logo { 
     font-size: 40px;
@@ -98,7 +104,7 @@ form {
 .blue {
     color: #0D4CD3;
 }
-input, select, .checkbox {
+input, textarea, select, .checkbox {
     color: #323232;
     font-size: 14px;
     background: #F5F7FA;
@@ -108,7 +114,7 @@ input, select, .checkbox {
     outline: none;
     transition: border-color 0.1s ease;
 }
-input:focus, select:focus  {
+input:focus, select:focus, textarea:focus  {
     color: rgb(32, 32, 32);
     border-color: #99B1E6;
 }

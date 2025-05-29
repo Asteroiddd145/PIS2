@@ -1,11 +1,9 @@
 <main>
-  <form action="/api/user/login" method="POST">
-    <p class="logo"><a href="/user/login"><span class="red">гос</span><span class="blue">услуги</span></a></p>
+  <form action="<%= api %>" method="POST">
+    <p class="logo"><a href="<%= link %>"><span class="red">гос</span><span class="blue">услуги</span></a></p>
     <input type="text" name="login" placeholder="Логин" required />
     <input type="password" name="password" placeholder="Пароль" required />
     <button type="submit">Войти</button>
   </form>
 </main>
-<div>
-  <a href="/user/signup">Зарегистрироваться</a>
-</div>
+<%-  additional %>

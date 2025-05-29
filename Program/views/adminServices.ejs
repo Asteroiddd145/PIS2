@@ -1,0 +1,36 @@
+<%- include('partials/adminHeader.ejs') %>
+
+<main>
+  <h1>Услуги</h1>
+  <div id="content">
+  </div>
+  <button onclick="window.location.href='/admin/services/new-service'">Добавить услугу</button>
+</main>
+
+<script>
+
+window.addEventListener("DOMContentLoaded", async () => {
+  fetch("/api/admin/services")
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`)
+      return res.json()
+    })
+    .then(data => {
+      const container = document.getElementById("content")
+      container.innerHTML = ""
+
+      data.services.forEach(service => {
+        const div = document.createElement("div")
+        div.className = "service"
+
+        const a = document.createElement("a")
+        a.textContent = service.name
+        a.href = `/admin/services/${service.serviceId}`
+
+        div.appendChild(a)
+        container.appendChild(div)
+      })
+    })
+})
+
+</script>

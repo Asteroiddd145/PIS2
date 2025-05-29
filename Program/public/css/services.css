@@ -11,3 +11,9 @@
         cursor: pointer;
     }
 }
+button {
+    width: 300px;
+    margin-top: 32px;
+    padding: 16px 8px;
+    cursor: pointer;
+}

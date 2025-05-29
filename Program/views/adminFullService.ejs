@@ -1,0 +1,326 @@
+<%- include('partials/adminHeader.ejs') %>
+
+<main>
+  <div id="content"></div>
+
+  <section class="formrules">
+    <div id="rulesContainer"></div>
+
+    <div class="add-rule">
+      <button type="button" onclick="addRule()">Добавить новое правило</button>
+    </div>
+  </section>
+
+  <template id="ruleTemplate">
+    <div class="rule-block">
+      <h2>Правило</h2>
+      <form class="ruleForm" data-rule-id="">
+        <div class="rule-grid">
+          <div class="form-item">
+            <label>Описание</label>
+            <textarea name="description" required></textarea>
+          </div>
+          <div class="form-item">
+            <label>Период</label>
+            <input type="number" name="period" required />
+          </div>
+        </div>
+
+        <h4>Параметры</h4>
+        <div class="paramContainer"></div>
+
+        <div class="rule-buttons">
+          <button type="submit">Сохранить правило</button>
+          <button type="button" onclick="removeRule(this)">Удалить правило</button>
+          <button type="button" onclick="addParam(this)">Добавить параметр</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <template id="paramTemplate">
+    <div class="param-block param-grid">
+      <div class="form-item">
+        <label>Группа</label>
+        <input type="number" name="groupNumber" value="0" required />
+      </div>
+      <div class="form-item">
+        <label>Оператор группы</label>
+        <select name="groupOperator">
+          <option value="AND">И</option>
+          <option value="OR">ИЛИ</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Параметр</label>
+        <select name="parameter">
+          <option value="">Нет</option>
+          <option value="citizenship">Гражданство</option>
+          <option value="isHQS">Высококвалифицированный специалист</option>
+          <option value="wasPreviouslyRegistered">Ранее находился на миграционном учёте</option>
+          <option value="isCompatriotProgramMember">Участник госпрограммы переселения</option>
+          <option value="purposeOfArrival">Цель въезда</option>
+          <option value="wasFingerprintRegistration">Проводилась дактилоскопическая регистрация</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Оператор параметра</label>
+        <select name="parameterOperator">
+          <option value="">Нет</option>
+          <option value="=">Равно</option>
+          <option value="!=">Не равно</option>
+          <option value=">">Больше</option>
+          <option value="<">Меньше</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Значение параметра</label>
+        <input type="text" name="parameterValue" />
+      </div>
+      <div class="form-item">
+        <label>&nbsp</label>
+        <button type="button" class="remove-button" onclick="removeParam(this)">Удалить</button>
+      </div>
+    </div>
+  </template>
+</main>
+
+<script>
+
+function loadServiceAndRules() {
+  const pathParts = window.location.pathname.split("/")
+  const serviceId = pathParts[pathParts.length - 1]
+
+  fetch(`/api/admin/services/${serviceId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`)
+      return res.json()
+    })
+    .then(data => {
+      if (data.redirect) {
+        window.location.href = data.redirect
+        return
+      }
+
+      const { service, rules } = data
+
+      if (!service || typeof service !== "object") {
+        throw new Error("Ошибка: объект 'service' не найден в ответе сервера.")
+      }
+
+      document.title = service.name || "Услуга"
+      const content = document.getElementById("content")
+      content.innerHTML = `
+        <h2 class="name">${service.name}</h2>
+        <div class="service_desc">
+          <h4>Описание услуги</h4>
+          <p>${service.serviceDescription}</p>
+        </div>
+        <div class="result_desc">
+          <h4>Описание результата</h4>
+          <p>${service.resultDescription}</p>
+        </div>
+        <div class="validity_dates">
+          <p><strong>Дата активации услуги:</strong> ${service.startDateOfValidity ? new Date(service.startDateOfValidity).toLocaleDateString() : "—"}</p>
+          <p><strong>Дата деактивации услуги:</strong> ${service.endDateOfValidity ? new Date(service.endDateOfValidity).toLocaleDateString() : "—"}</p>
+          <button type="button" id="deactivateButton">Деактивировать услугу</button>
+        </div>
+      `
+
+      const container = document.getElementById("rulesContainer")
+      container.innerHTML = ""
+
+      if (!Array.isArray(rules) || rules.length === 0) {
+        container.innerHTML = `<p>Правил нет.</p>`
+        return
+      }
+
+      rules.forEach(rule => {
+        const ruleEl = createRuleElement(rule)
+        container.appendChild(ruleEl)
+      })
+    })
+    .catch(error => {
+      console.error("Ошибка при загрузке услуги и правил:", error)
+      alert(error.message)
+    })
+}
+
+function createRuleElement(rule) {
+  const template = document.getElementById("ruleTemplate")
+  const clone = template.content.cloneNode(true)
+  const form = clone.querySelector("form.ruleForm")
+  form.dataset.ruleId = rule.ruleId
+  form.querySelector('textarea[name="description"]').value = rule.description || ""
+  form.querySelector('input[name="period"]').value = rule.period || ""
+  const paramContainer = form.querySelector(".paramContainer")
+  paramContainer.innerHTML = ""
+  if (rule.parameters && rule.parameters.length > 0) {
+    rule.parameters.forEach(param => {
+      const paramEl = createParamElement(param)
+      paramContainer.appendChild(paramEl)
+    })
+  } else {
+    paramContainer.appendChild(createParamElement())
+  }
+  return clone
+}
+
+function createParamElement(param = {}) {
+  const template = document.getElementById("paramTemplate")
+  const clone = template.content.cloneNode(true)
+
+  clone.querySelector('input[name="groupNumber"]').value = param.groupNumber ?? 0
+  clone.querySelector('select[name="groupOperator"]').value = param.groupOperator ?? "AND"
+
+  clone.querySelector('select[name="parameter"]').value = param.parameter ?? ""
+  clone.querySelector('select[name="parameterOperator"]').value = param.parameterOperator ?? ""
+  clone.querySelector('input[name="parameterValue"]').value = param.parameterValue ?? ""
+
+  return clone
+}
+
+function saveRule(form) {
+  const paramBlocks = [...form.querySelectorAll(".param-block")]
+
+  const parameters = paramBlocks.map(block => {
+    const rawValue = block.querySelector('input[name="parameterValue"]').value.trim()
+    let normalizedValue = rawValue
+
+    const truthy = ["true", "истина", "правда", "1"]
+    const falsy = ["false", "ложь", "0"]
+
+    if (truthy.includes(rawValue.toLowerCase())) {
+      normalizedValue = true
+    } else if (falsy.includes(rawValue.toLowerCase())) {
+      normalizedValue = false
+    } else if (rawValue.toLowerCase() === "work" || rawValue.toLowerCase() === "трудоустройство") {
+      normalizedValue = "work"
+    }
+
+    return {
+      groupNumber: Number(block.querySelector('input[name="groupNumber"]').value),
+      groupOperator: block.querySelector('select[name="groupOperator"]').value || "AND",
+      parameter: block.querySelector('select[name="parameter"]').value || null,
+      parameterOperator: block.querySelector('select[name="parameterOperator"]').value || null,
+      parameterValue: normalizedValue
+    }
+  })
+
+  const description = form.querySelector('textarea[name="description"]').value.trim()
+  const period = Number(form.querySelector('input[name="period"]').value)
+
+  const pathParts = window.location.pathname.split("/")
+  const serviceId = pathParts[pathParts.length - 1]
+  const ruleId = form.dataset.ruleId || null
+
+  const payload = { ruleId, serviceId, description, period, parameters }
+
+  let url, method
+  if (ruleId) {
+    url = `/api/admin/services/${serviceId}/${ruleId}`
+    method = "PATCH"
+  } else {
+    url = `/api/admin/services/${serviceId}`
+    method = "POST"
+  }
+
+  fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rule: payload })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+    return res.json()
+  })
+  .then(data => {
+    window.location.reload()
+  })
+  .catch(err => alert(err.message))
+}
+
+function addParam(button) {
+  const ruleBlock = button.closest(".rule-block")
+  const container = ruleBlock.querySelector(".paramContainer")
+  const paramTemplate = document.getElementById("paramTemplate")
+  container.appendChild(paramTemplate.content.cloneNode(true))
+}
+
+function removeParam(button) {
+  const paramBlock = button.closest(".param-block")
+  const container = paramBlock.parentNode
+  if (container.querySelectorAll(".param-block").length > 1) {
+    container.removeChild(paramBlock)
+  }
+}
+
+function removeRule(button) {
+  const ruleBlock = button.closest(".rule-block")
+  const form = ruleBlock.querySelector("form.ruleForm")
+  const serviceId = window.location.pathname.split("/").pop()
+  const ruleId = form.dataset.ruleId
+
+  if (!ruleId) {
+    ruleBlock.remove()
+    return
+  }
+
+  fetch(`/api/admin/services/${serviceId}/${ruleId}`, { method: "DELETE" })
+    .then(res => {
+      if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+      return res.json()
+    })
+    .then(data => {
+      ruleBlock.remove()
+      window.location.reload()
+    })
+    .catch(error => window.location.reload())
+}
+
+function addRule() {
+  const container = document.getElementById("rulesContainer")
+  const template = document.getElementById("ruleTemplate")
+  const clone = template.content.cloneNode(true)
+  const paramContainer = clone.querySelector(".paramContainer")
+  const paramTemplate = document.getElementById("paramTemplate")
+  paramContainer.appendChild(paramTemplate.content.cloneNode(true))
+  container.appendChild(clone)
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadServiceAndRules()
+
+  document.body.addEventListener("click", (event) => {
+    if (event.target.id === "deactivateButton") {
+      const serviceId = window.location.pathname.split("/").pop()
+        fetch(`/api/admin/services/${serviceId}/inactive`, {
+          method: "PATCH"
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.redirect) {
+            window.location.href = data.redirect
+          }
+        })
+    }
+  })
+
+  document.body.addEventListener('submit', event => {
+  if (event.target.classList.contains('ruleForm')) {
+    event.preventDefault()
+    console.log("Форма для сохранения:", event.target)
+    if (!event.target) {
+      alert("Что-то не так: event.target отсутствует")
+      return
+    }
+    if (!event.target.dataset) {
+      alert("Что-то не так: у формы нет dataset")
+      return
+    }
+    saveRule(event.target)
+  }
+})
+
+})
+</script>
