@@ -44,9 +44,16 @@ class CivilServantService {
     }
 
     async getAllRequestsByStatus(status, civilServantId) {
-        const requests = await requestRepository.getAllByStatus(status, civilServantId)
+        const requests = await requestRepository.getAllByStatus(status)
         const allServices = await serviceRepository.getAll()
-        const requestsWithServices = requests.map(request => {
+
+        const filteredRequests = civilServantId
+            ? requests.filter(r => r.civilServantId === civilServantId)
+            : requests
+
+        const sortedRequests = filteredRequests.sort((a, b) => new Date(a.dateOfSubmission) - new Date(b.dateOfSubmission))
+
+        const requestsWithServices = sortedRequests.map(request => {
             const service = allServices.find(s => s.serviceId === request.serviceId)
             return { request, service }
         })
@@ -54,6 +61,15 @@ class CivilServantService {
         return requestsWithServices
     }
 
+    async attachRequestResult(requestId, result) {
+        const request = await requestRepository.findById(requestId)
+        if (request) {
+            request.result = result
+            await requestRepository.update(requestId, request)
+        } else {
+            throw new Errors.RequestNotExist()
+        }
+    }
 
     async changeRequestStatus(requestId, status) {
         const request = await requestRepository.findById(requestId)
@@ -64,16 +80,6 @@ class CivilServantService {
             } else if (status === requestStatus.IN_PROGRESS) {
                 request.dateOfCompletion = null
             }
-            await requestRepository.update(requestId, request)
-        } else {
-            throw new Errors.RequestNotExist()
-        }
-    }
-
-    async attachRequestResult(requestId, result) {
-        const request = await requestRepository.findById(requestId)
-        if (request) {
-            request.result = result
             await requestRepository.update(requestId, request)
         } else {
             throw new Errors.RequestNotExist()

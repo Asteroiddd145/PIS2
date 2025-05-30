@@ -15,25 +15,16 @@ class RequestRepository {
         return []
     }
 
-    async getAllByStatus(status, civilServantId) {
-        let result
-        if (civilServantId) {
-            result = await db.query(
-                "SELECT * FROM requests WHERE status = $1 AND civil_servant_id = $2 ORDER BY date_of_submission", 
-                [status, civilServantId]
-            )
-        } else {
-            result = await db.query(
-                "SELECT * FROM requests WHERE status = $1 ORDER BY date_of_submission", 
-                [status]
-            )
-        }   
+    async getAllByStatus(status) {
+        const result = await db.query(
+            "SELECT * FROM requests WHERE status = $1", 
+            [status]
+        )
         const rows = result.rows
         if (rows.length > 0) {
             const list = rows.map(row => requestConverter.fromDatabasetoRequest(row))
             return list
         }
-        
         return []
     }
 

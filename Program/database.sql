@@ -16,7 +16,13 @@ CREATE TABLE users (
 	passport_series VARCHAR(4),
 	date_of_birth DATE,
 	citizenship VARCHAR(64),
-	email VARCHAR(64)
+	email VARCHAR(64),
+	purpose_of_arrival VARCHAR(64),
+	date_of_entry DATE,
+	is_hqs BOOLEAN,
+	is_compatriot_program_member BOOLEAN,
+	was_previously_registered BOOLEAN,
+	was_fingerprint_registration BOOLEAN
 );
 
 CREATE TABLE services (

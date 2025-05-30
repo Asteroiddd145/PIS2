@@ -18,17 +18,9 @@ class AdminService {
         }
     }
 
-    async getService(serviceId) {
-        const service = await serviceRepository.findById(serviceId)
-        if (service) {
-            if (service.endDateOfValidity === null) {
-                return service
-            } else {
-                throw new Errors.ServiceIsDeactive()
-            }
-        } else {
-            throw new Errors.ServiceNotExist()
-        }
+    async getAllServices() {
+        const list = await serviceRepository.getAll()
+        return list
     }
 
     async getServiceAndRules(serviceId) {
@@ -40,16 +32,6 @@ class AdminService {
             throw new Errors.ServiceNotExist()
         }
     }
-    
-    async getAllServices() {
-        const list = await serviceRepository.getAll()
-        return list
-    }
-
-    async getRulesForService(serviceId) {
-        const rules = await ruleRepository.findAllByService(serviceId)
-        return rules
-    }
 
     async createService(service, rules) {
         const createdService = service
@@ -60,9 +42,9 @@ class AdminService {
             for (const rule of rules) {
                 const isDuplicate = existedRules.some(existingRule => {
                     return (
-                    existingRule.description === rule.description &&
-                    existingRule.period === rule.period &&
-                    areParamsEqual(existingRule.parameters, rule.parameters)
+                        existingRule.description === rule.description &&
+                        existingRule.period === rule.period &&
+                        areParamsEqual(existingRule.parameters, rule.parameters)
                     )
                 })
                 if (!isDuplicate) {
@@ -80,7 +62,6 @@ class AdminService {
                 service.name += " (неактивна)"
                 service.endDateOfValidity = new Date()
                 await serviceRepository.update(serviceId, service)
-                return service
             } else {
                 throw new Errors.ServiceIsDeactive()
             }
@@ -96,9 +77,7 @@ class AdminService {
                 const existedRules = await ruleRepository.findAllByService(serviceId)
                 const isDuplicate = existedRules.some(existing => existing.description === rule.description && existing.period === rule.period && existing.parameter === rule.parameter && existing.logicalOperator === rule.logicalOperator && existing.parameterValue === rule.parameterValue)
                 if (!isDuplicate) {
-                    const ruleId = await ruleRepository.save(rule, serviceId)
-                    const createdRule = await ruleRepository.findById(ruleId)
-                    return createdRule
+                    await ruleRepository.save(rule, serviceId)
                 } else {
                     throw new Errors.RuleAlreadyExist()
                 }                

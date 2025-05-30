@@ -8,10 +8,10 @@ const Request = require("../models/request")
 const Errors = require("../errors")
 
 class UserService {
-    async trySignUp(savedUser) {
-        const user = await userRepository.findByLogin(savedUser.login)
-        if (!user) {
-            await userRepository.save(savedUser)
+    async trySignUp(user) {
+        const checkingUser = await userRepository.findByLogin(user.login)
+        if (!checkingUser) {
+            await userRepository.save(user)
             return true
         } else {
             throw new Errors.LoginAlreadyExist()
@@ -75,19 +75,6 @@ class UserService {
         return activeServices
     }
 
-    async getService(serviceId) {
-        const service = await serviceRepository.findById(serviceId)
-        if (service) {
-            if (service.endDateOfValidity === null) {
-                return service
-            } else {
-                throw new Errors.ServiceIsDeactive()
-            }
-        } else {
-            throw new Errors.ServiceNotExist()
-        }
-    }
-
     async getServiceAndRules(serviceId) {
         const service = await serviceRepository.findById(serviceId)
         if (service) {
@@ -123,8 +110,7 @@ class UserService {
 
                         if (rules.length === 0) {
                             const request = new Request(null, userId, null, serviceId, requestStatus.WAITING, null, new Date(now + 3 * 24 * 60 * 60 * 1000), new Date())
-                            const requestId = await requestRepository.save(request)
-                            return requestId
+                            await requestRepository.save(request)
                         }
 
                         let emptyRule = null
@@ -157,7 +143,7 @@ class UserService {
                                 const base = user.dateOfEntry ? user.dateOfEntry.getTime() : now
                                 const date = new Date(Math.max(now, base + chosenRule.period * 24 * 60 * 60 * 1000))
                                 const request = new Request(null, userId, null, serviceId, requestStatus.WAITING, null, date, new Date())
-                                return await requestRepository.save(request)
+                                await requestRepository.save(request)
                             } else {
                                 throw new Errors.RequestPeriodHasExpired()
                             }
